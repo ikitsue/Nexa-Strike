@@ -1,0 +1,268 @@
+.credits-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 100%);
+  padding: 2rem 0;
+}
+
+.credits-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.credits-container h1 {
+  color: #00d4ff;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  border-bottom: 2px solid #00d4ff;
+  padding-bottom: 1rem;
+}
+
+.credits-intro {
+  text-align: center;
+  color: #b0b0b0;
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+}
+
+.credits-section {
+  background-color: rgba(26, 31, 58, 0.8);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.credits-section h2 {
+  color: #00d4ff;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid #00d4ff;
+  padding-left: 1rem;
+}
+
+.credits-section h3 {
+  color: #b0d4ff;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.credits-section p {
+  color: #d0d0d0;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.credits-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.credits-section li {
+  color: #d0d0d0;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.credits-section li:before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #00d4ff;
+}
+
+/* Credits Grid */
+.credits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.credit-card {
+  background-color: rgba(0, 212, 255, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 6px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.credit-card:hover {
+  border-color: #00d4ff;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.15);
+  transform: translateY(-4px);
+}
+
+.credit-card h3 {
+  color: #00d4ff;
+  margin-bottom: 0.75rem;
+}
+
+.credit-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-bottom: 0.25rem;
+}
+
+.credit-role {
+  color: #808080;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.credit-card a {
+  color: #00d4ff;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s;
+}
+
+.credit-card a:hover {
+  color: #4dd9ff;
+  text-decoration: underline;
+}
+
+/* Tech List */
+.tech-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.tech-category h3 {
+  color: #00d4ff;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.tech-category ul {
+  list-style: none;
+  padding: 0;
+}
+
+.tech-category li {
+  color: #d0d0d0;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.tech-category li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #4ade80;
+  font-weight: bold;
+}
+
+.tech-category strong {
+  color: #00d4ff;
+}
+
+/* License Info */
+.license-info {
+  background-color: rgba(0, 212, 255, 0.05);
+  padding: 1rem;
+  border-left: 3px solid #00d4ff;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.license-info strong {
+  color: #00d4ff;
+}
+
+.source-code {
+  background-color: rgba(0, 212, 255, 0.05);
+  padding: 1rem;
+  border-left: 3px solid #00d4ff;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.source-code a {
+  color: #00d4ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.source-code a:hover {
+  text-decoration: underline;
+}
+
+/* Thanks List */
+.thanks-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.thanks-list li {
+  background-color: rgba(0, 212, 255, 0.05);
+  padding: 1rem;
+  border-radius: 4px;
+  border-left: 2px solid #00d4ff;
+}
+
+/* Made With Section */
+.made-with {
+  background: linear-gradient(135deg, rgba(255, 68, 68, 0.05), rgba(0, 212, 255, 0.05));
+  border-color: rgba(255, 68, 68, 0.3);
+}
+
+.made-with h2 {
+  color: #ff6b6b;
+}
+
+.support-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.support-list li {
+  color: #d0d0d0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.support-list li:before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+.support-list a {
+  color: #00d4ff;
+  text-decoration: none;
+}
+
+.support-list a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .credits-container {
+    padding: 2rem 1rem;
+  }
+
+  .credits-container h1 {
+    font-size: 1.8rem;
+  }
+
+  .credits-section {
+    padding: 1.5rem;
+  }
+
+  .credits-grid,
+  .tech-list,
+  .thanks-list {
+    grid-template-columns: 1fr;
+  }
+}

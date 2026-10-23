@@ -1,0 +1,126 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #050d19;
+  --bg-gradient:
+    radial-gradient(ellipse at 78% 0%, rgba(0, 200, 255, 0.08), transparent 36%),
+    linear-gradient(180deg, #071324 0%, #050d19 46%, #050b15 100%);
+  --bg-secondary: #081629;
+  --surface: rgba(8, 22, 41, 0.98);
+  --surface-raised: #0b192b;
+  --text: #eaf4ff;
+  --muted: #a9bcd1;
+  --accent: #00c8ff;
+  --accent-strong: #00b8eb;
+  --accent-soft: rgba(0, 200, 255, 0.12);
+  --orange: #ff7a24;
+  --border: rgba(81, 139, 177, 0.24);
+  --ghost: rgba(255, 255, 255, 0.035);
+  --overlay: rgba(2, 8, 16, 0.72);
+  --error: #ff6a6a;
+  --success: #4ade80;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f1f6fb;
+  --bg-gradient: linear-gradient(180deg, #f5f9fd 0%, #edf3f9 100%);
+  --bg-secondary: #e8f0f7;
+  --surface: rgba(255, 255, 255, 0.98);
+  --surface-raised: #fff;
+  --text: #142337;
+  --muted: #566a80;
+  --accent: #007fa5;
+  --accent-strong: #006987;
+  --accent-soft: rgba(0, 127, 165, 0.1);
+  --orange: #bd4d00;
+  --border: rgba(31, 68, 96, 0.16);
+  --ghost: rgba(20, 45, 66, 0.04);
+  --overlay: rgba(15, 34, 52, 0.4);
+  --error: #b42318;
+  --success: #166534;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  font-family: Inter, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-gradient);
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  color: #03121d;
+  background: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+
+  body {
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #24445e;
+  border: 2px solid var(--bg-secondary);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}

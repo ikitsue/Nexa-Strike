@@ -1,0 +1,225 @@
+.easter-egg {
+  min-height: min(68vh, 680px);
+  display: grid;
+  place-items: center;
+  padding: clamp(1.25rem, 5vw, 3rem);
+}
+
+.easter-egg__card {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 900px);
+  padding: clamp(2rem, 6vw, 3.5rem) clamp(1.25rem, 5vw, 3rem);
+  overflow: hidden;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at 50% 0%, var(--accent-soft), transparent 58%),
+    var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+}
+
+.easter-egg__intro {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.easter-egg__card::before,
+.easter-egg__card::after {
+  position: absolute;
+  z-index: -1;
+  color: var(--accent);
+  opacity: 0.18;
+  font-size: 2rem;
+  content: '✦';
+  animation: easter-egg-twinkle 2.4s ease-in-out infinite alternate;
+}
+
+.easter-egg__card::before {
+  top: 18%;
+  left: 12%;
+}
+
+.easter-egg__card::after {
+  right: 13%;
+  bottom: 18%;
+  animation-delay: 0.8s;
+}
+
+.easter-egg__eyebrow {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.easter-egg__icon {
+  margin: 1.2rem 0 0.5rem;
+  font-size: clamp(3.5rem, 10vw, 5rem);
+  filter: drop-shadow(0 0 22px var(--accent-soft));
+  animation: easter-egg-float 3s ease-in-out infinite;
+}
+
+.easter-egg__card h1 {
+  margin: 0 0 0.75rem;
+  color: var(--text);
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.easter-egg__card p {
+  max-width: 420px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.easter-egg__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 1.75rem 0;
+  padding: 0.65rem 0.9rem;
+  color: var(--text);
+  background: var(--ghost);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-decoration: none;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+button.easter-egg__badge {
+  cursor: pointer;
+}
+
+.easter-egg__badge:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.easter-egg__badge:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.easter-egg__badge:disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.easter-egg__badge span {
+  color: var(--orange);
+}
+
+.easter-egg__link {
+  display: flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 0.7rem 1.1rem;
+  color: #03131e;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-weight: 750;
+  text-decoration: none;
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.easter-egg__link:hover {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+}
+
+.easter-egg__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.easter-egg__contributors {
+  margin-top: clamp(2rem, 5vw, 3.5rem);
+  padding-top: clamp(1.5rem, 4vw, 2.25rem);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.easter-egg__contributors h2 {
+  margin: 0 0 1.25rem;
+  color: var(--text);
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  letter-spacing: -0.025em;
+}
+
+.easter-egg__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 230px));
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.easter-egg__list li {
+  min-width: 0;
+  padding: 0.8rem 1rem;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  background:
+    linear-gradient(135deg, var(--accent-soft), transparent 75%),
+    var(--ghost);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-weight: 600;
+  text-align: center;
+  transition: border-color 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
+}
+
+.easter-egg__list li:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.easter-egg__message {
+  margin: 0;
+  color: var(--muted);
+}
+
+.easter-egg__message--error {
+  color: var(--error);
+}
+
+.easter-egg__message--notice {
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+}
+
+@keyframes easter-egg-float {
+  50% {
+    transform: translateY(-7px) rotate(-4deg);
+  }
+}
+
+@keyframes easter-egg-twinkle {
+  to {
+    opacity: 0.45;
+    transform: scale(1.2) rotate(20deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .easter-egg__card::before,
+  .easter-egg__card::after,
+  .easter-egg__icon {
+    animation: none;
+  }
+}
