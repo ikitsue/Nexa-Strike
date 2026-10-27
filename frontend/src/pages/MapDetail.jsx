@@ -42,6 +42,41 @@ const defaultFilters = {
   grenade: true,
 };
 
+const initialFilters = {
+  smoke: true,
+  molotov: false,
+  flash: false,
+  grenade: false,
+};
+
+const getMapDetailPreferences = (mapId) => {
+  const savedPreferences = localStorage.getItem(`nexastrike-map-detail-preferences-${mapId}`);
+  if (!savedPreferences) {
+    return { filters: initialFilters, selectedTeam: 'all' };
+  }
+
+  let preferences;
+  try {
+    preferences = JSON.parse(savedPreferences);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      return { filters: initialFilters, selectedTeam: 'all' };
+    }
+    throw error;
+  }
+
+  const savedFilters = preferences?.filters;
+  return {
+    filters: Object.fromEntries(
+      Object.keys(initialFilters).map((type) => [
+        type,
+        typeof savedFilters?.[type] === 'boolean' ? savedFilters[type] : initialFilters[type],
+      ]),
+    ),
+    selectedTeam: ['all', 'ct', 't'].includes(preferences?.selectedTeam) ? preferences.selectedTeam : 'all',
+  };
+};
+
 const metadataValueKeys = {
   yes: 'jumpThrowYes',
   no: 'jumpThrowNo',
@@ -75,7 +110,7 @@ const MapDetail = () => {
   const [points, setPoints] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState(defaultFilters);
+  const [filters, setFilters] = useState(() => getMapDetailPreferences(id).filters);
   const [zoom, setZoom] = useState(100);
   const [rotation, setRotation] = useState(0);
   const [panX, setPanX] = useState(0);
@@ -83,7 +118,9 @@ const MapDetail = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [activeView, setActiveView] = useState('official');
-  const [selectedTeam, setSelectedTeam] = useState('all');
+  const [selectedTeam, setSelectedTeam] = useState(() => getMapDetailPreferences(id).selectedTeam);
+  const loadedPreferencesMapId = useRef(id);
+  const skipPreferenceSave = useRef(false);
   const zoomContainerRef = useRef(null);
   const zoomRef = useRef(100);
   const panRef = useRef({ x: 0, y: 0 });
@@ -91,6 +128,28 @@ const MapDetail = () => {
   const [mapsList, setMapsList] = useState([]);
   const [mapsOpen, setMapsOpen] = useState(false);
   const mapsDropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (loadedPreferencesMapId.current === id) return;
+
+    const savedPreferences = getMapDetailPreferences(id);
+    setFilters(savedPreferences.filters);
+    setSelectedTeam(savedPreferences.selectedTeam);
+    loadedPreferencesMapId.current = id;
+    skipPreferenceSave.current = true;
+  }, [id]);
+
+  useEffect(() => {
+    if (skipPreferenceSave.current) {
+      skipPreferenceSave.current = false;
+      return;
+    }
+
+    localStorage.setItem(
+      `nexastrike-map-detail-preferences-${id}`,
+      JSON.stringify({ filters, selectedTeam }),
+    );
+  }, [id, filters, selectedTeam]);
 
   useEffect(() => {
     const fetchData = async () => {

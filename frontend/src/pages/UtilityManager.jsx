@@ -5,6 +5,41 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../i18n';
 import './UtilityManager.css';
 
+const initialUtilityFilters = {
+  smoke: true,
+  flash: false,
+  molotov: false,
+  grenade: false,
+};
+
+const getUtilityManagerPreferences = (mapId) => {
+  const savedPreferences = localStorage.getItem(`nexastrike-utility-manager-preferences-${mapId}`);
+  if (!savedPreferences) {
+    return { utilityFilters: initialUtilityFilters, selectedTeam: 'all' };
+  }
+
+  let preferences;
+  try {
+    preferences = JSON.parse(savedPreferences);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      return { utilityFilters: initialUtilityFilters, selectedTeam: 'all' };
+    }
+    throw error;
+  }
+
+  const savedFilters = preferences?.utilityFilters;
+  return {
+    utilityFilters: Object.fromEntries(
+      Object.keys(initialUtilityFilters).map((type) => [
+        type,
+        typeof savedFilters?.[type] === 'boolean' ? savedFilters[type] : initialUtilityFilters[type],
+      ]),
+    ),
+    selectedTeam: ['all', 'ct', 't'].includes(preferences?.selectedTeam) ? preferences.selectedTeam : 'all',
+  };
+};
+
 const UtilityManager = () => {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,17 +54,12 @@ const UtilityManager = () => {
   const [isPlacingLineGroup, setIsPlacingLineGroup] = useState(false);
   const [selectedParentZone, setSelectedParentZone] = useState(null);
   const [selectedLineGroup, setSelectedLineGroup] = useState(null);
-  const [utilityFilters, setUtilityFilters] = useState({
-    smoke: true,
-    flash: true,
-    molotov: true,
-    grenade: true,
-  });
+  const [utilityFilters, setUtilityFilters] = useState(() => getUtilityManagerPreferences(mapQueryId).utilityFilters);
   const [activePlacementType, setActivePlacementType] = useState('smoke');
   const [selectedPlacementTeam, setSelectedPlacementTeam] = useState('t');
   const [showZoneTypeDropdown, setShowZoneTypeDropdown] = useState(false);
   const [editingPointId, setEditingPointId] = useState(null);
-  const [selectedTeam, setSelectedTeam] = useState('all');
+  const [selectedTeam, setSelectedTeam] = useState(() => getUtilityManagerPreferences(mapQueryId).selectedTeam);
   const [zoom, setZoom] = useState(100);
   const [rotation, setRotation] = useState(0);
   const [panX, setPanX] = useState(0);
@@ -43,6 +73,31 @@ const UtilityManager = () => {
   const zoomRef = useRef(100);
   const panRef = useRef({ x: 0, y: 0 });
   const didDragMapRef = useRef(false);
+  const loadedPreferencesMapId = useRef(mapQueryId);
+  const skipPreferenceSave = useRef(false);
+
+  useEffect(() => {
+    if (loadedPreferencesMapId.current === mapQueryId) return;
+
+    const savedPreferences = getUtilityManagerPreferences(mapQueryId);
+    setUtilityFilters(savedPreferences.utilityFilters);
+    setSelectedTeam(savedPreferences.selectedTeam);
+    loadedPreferencesMapId.current = mapQueryId;
+    skipPreferenceSave.current = true;
+  }, [mapQueryId]);
+
+  useEffect(() => {
+    if (!mapQueryId) return;
+    if (skipPreferenceSave.current) {
+      skipPreferenceSave.current = false;
+      return;
+    }
+
+    localStorage.setItem(
+      `nexastrike-utility-manager-preferences-${mapQueryId}`,
+      JSON.stringify({ utilityFilters, selectedTeam }),
+    );
+  }, [mapQueryId, utilityFilters, selectedTeam]);
 
   const createEmptyPointForm = (utilityType = 'smoke') => ({
     name: '',
