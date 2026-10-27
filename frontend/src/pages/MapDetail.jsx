@@ -843,7 +843,7 @@ const MapDetail = () => {
                 {youtubeEmbedUrl ? (
                   preferences.externalMedia ? (
                     <iframe
-                      src={youtubeEmbedUrl}
+                      src={`${youtubeEmbedUrl}?vq=hd1080`}
                       title={`${activePoint.name} — YouTube`}
                       className="detail-video detail-video-embed"
                       loading="lazy"
