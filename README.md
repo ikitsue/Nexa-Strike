@@ -1,106 +1,103 @@
 # NexaStrike
 
-Projet multi-plateforme pour la gestion et la visualisation de cartes, suggestions et clips.
+A multi-platform application for browsing and managing maps, suggestions, and clips.
 
-## Description
+## Overview
 
-NexaStrike est une application composée de plusieurs parties : backend (API + base de données), frontend web, et une version desktop electron. Ce dépôt contient le code source, les scripts d'initialisation de la base et les assets nécessaires.
+NexaStrike is made up of several components: a backend (API and database), a web frontend, and a desktop app built with Electron. This repository contains the source code, database setup scripts, and required assets.
 
-## Arborescence principale
+## Project structure
 
-- `backend/` : API Node.js et scripts d'initialisation de la base de données
-- `desktop/` : application Electron pour bureau
-- `frontend/` et `src/` : interfaces web (plusieurs variantes pour déploiement)
-- `public/`, `uploads/` : assets publics et fichiers uploadés
+- `backend/`: Node.js API and database setup scripts
+- `desktop/`: Electron desktop application
+- `frontend/`: web interface
+- `public/`, `uploads/`: public assets and uploaded files
 
-## Prérequis
+## Requirements
 
 - Node.js (>=14)
-- npm ou yarn
-- PostgreSQL (si vous utilisez le backend en local)
+- npm or yarn
+- PostgreSQL (if running the backend locally)
 
-## Installation et exécution rapide
+## Quick start
 
-1. Installer les dépendances (racine ou dossiers spécifiques) :
+1. Install the dependencies (at the root or in the relevant directories):
 
-```
+```bash
 npm install
 cd backend && npm install
 cd ../frontend && npm install
 ```
 
-2. Initialiser la base de données (si nécessaire) :
+2. Initialize the database, if needed:
 
-```
+```bash
 node backend/init-db.js
 ```
 
-3. Lancer le backend :
+3. Start the backend:
 
-```
+```bash
 cd backend
 npm start
 ```
 
-4. Lancer le frontend (développement) :
+4. Start the frontend in development mode:
 
-```
+```bash
 cd frontend
 npm start
 ```
 
-5. Lancer l'app desktop (si configurée) :
+5. Start the desktop app, if configured:
 
-```
+```bash
 cd desktop
 npm start
 ```
 
 ## Configuration
 
-Vérifiez `backend/config/database.js` pour les paramètres de connexion à la base. Utilisez des variables d'environnement pour les identifiants sensibles.
+Check `backend/config/database.js` for database connection settings. Use environment variables for sensitive credentials.
 
-Pour le frontend, copiez `frontend/.env.example` vers `frontend/.env.local` et renseignez les variables requises. Les fichiers `.env*` contenant des valeurs locales ou de production ne doivent pas être ajoutés à Git. La clé Supabase publishable/anon est destinée au client ; ne placez jamais une clé `service_role` ou un autre secret serveur dans le frontend.
+For the frontend, copy `frontend/.env.example` to `frontend/.env.local` and provide the required values. Do not commit `.env*` files containing local or production values. The Supabase publishable/anon key is intended for client-side use; never put a `service_role` key or another server secret in the frontend.
 
-Pour le backend, copiez `backend/.env.example` vers `backend/.env` et remplacez les valeurs d'exemple par vos propres paramètres. Ne publiez pas les fichiers `.env`. Le script `node backend/set-user-admin.js <email-utilisateur>` exige l'adresse e-mail explicitement ; adaptez aussi les valeurs d'exemple de `backend/create_admin.sql` avant de l'exécuter.
+For the backend, copy `backend/.env.example` to `backend/.env` and replace the example values with your own settings. Do not publish `.env` files. The `node backend/set-user-admin.js <user-email>` script requires an explicit email address; also replace the example values in `backend/create_admin.sql` before running it.
 
-Pour publier ce projet dans un nouveau dépôt sans réexposer les anciens e-mails de commit ou les références de pull request, créez un dépôt Git neuf et publiez un instantané du code sans importer l'ancien historique. Configurez Git pour utiliser l'adresse e-mail `noreply` fournie par GitHub avant de créer le premier commit public.
+To publish this project to a new repository without exposing old commit email addresses or pull request references, create a fresh Git repository and publish a snapshot of the code without importing the old history. Configure Git to use the GitHub-provided `noreply` email address before creating the first public commit.
 
-## Sécurité Supabase
+## Supabase security
 
-La migration `supabase/migrations/20261012075726_secure_admin_authorization.sql` protège les tables `users`, `maps`, `utility_points`, `suggestions`, `clips` et `comments`. Elle remplace les politiques RLS existantes sur ces tables, limite les droits SQL, retire aux clients l'accès aux mots de passe et jetons stockés dans `users`, et réserve les changements de rôle, de bannissement et d'approbation aux administrateurs autorisés.
+The migration `supabase/migrations/20261012075726_secure_admin_authorization.sql` protects the `users`, `maps`, `utility_points`, `suggestions`, `clips`, and `comments` tables. It replaces the existing RLS policies on these tables, restricts SQL privileges, removes client access to passwords and tokens stored in `users`, and reserves role changes, bans, and approvals for authorized administrators.
 
-Cette migration suppose que les tables applicatives de `backend/database.sql` existent déjà dans le projet Supabase. Après avoir lié le dépôt au bon projet, examiner le plan de migration puis appliquer les migrations avec `supabase db push --linked`. Ne pas appliquer cette migration à un autre projet par erreur. Le script `backend/supabase-rls.sql` est maintenu pour les installations manuelles existantes.
+This migration assumes that the application tables from `backend/database.sql` already exist in the Supabase project. After linking the repository to the correct project, review the migration plan and apply the migrations with `supabase db push --linked`. Do not accidentally apply this migration to another project. The `backend/supabase-rls.sql` script is maintained for existing manual installations.
 
-Les contrôles React sur `/admin`, `/admin/tickets`, `/utility-manager` et l'éditeur de cartes servent uniquement à masquer l'interface : les politiques RLS et les privilèges PostgreSQL restent la protection réelle des données et opérations.
+The React checks on `/admin`, `/admin/tickets`, `/utility-manager`, and the map editor only hide the interface; RLS policies and PostgreSQL privileges provide the actual protection for data and operations.
 
-Le test pgTAP `supabase/tests/admin_authorization_test.sql` vérifie les tentatives d'auto-promotion, de changement de bannissement et d'auto-approbation. Il s'exécute avec `supabase test db` dans un environnement Supabase local qui contient le schéma applicatif.
+The pgTAP test `supabase/tests/admin_authorization_test.sql` checks attempts at self-promotion, changing ban status, and self-approval. Run it with `supabase test db` in a local Supabase environment that contains the application schema.
 
-### Système de tickets
+### Ticket system
 
-Sur le site web, les tickets et leurs réponses sont stockés dans Supabase. Les administrateurs les gèrent sur `/admin/tickets` ; les utilisateurs connectés retrouvent leurs tickets sur `/my-tickets`. Un ticket envoyé sans compte peut être rattaché au suivi après connexion ou inscription avec la même adresse e-mail vérifiée.
+On the website, tickets and their replies are stored in Supabase. Administrators manage them at `/admin/tickets`; signed-in users can find their tickets at `/my-tickets`. A ticket submitted without an account can be linked to the user's account after they sign in or register with the same verified email address.
 
-Pour activer le système dans un projet Supabase :
+To enable the system in a Supabase project:
 
-1. Lier le bon projet avec `supabase link`, puis examiner et appliquer la migration avec `supabase db push --linked`.
-2. Configurer le secret `HCAPTCHA_SECRET` dans **Supabase Dashboard → Edge Functions → Secrets** (ou avec `supabase secrets set HCAPTCHA_SECRET=<secret>`). Ne jamais mettre ce secret dans le frontend ni dans le dépôt.
-3. Déployer l’Edge Function avec `supabase functions deploy create-ticket`.
+1. Link the correct project with `supabase link`, then review and apply the migration with `supabase db push --linked`.
+2. Configure the `HCAPTCHA_SECRET` secret in **Supabase Dashboard → Edge Functions → Secrets** (or with `supabase secrets set HCAPTCHA_SECRET=<secret>`). Never put this secret in the frontend or in the repository.
+3. Deploy the Edge Function with `supabase functions deploy create-ticket`.
 
-La création publique passe par cette fonction et vérifie hCaptcha côté serveur. Les clés Supabase restent gérées par l’environnement Edge ; aucune clé `service_role` n’est nécessaire dans le frontend.
+Public ticket creation goes through this function, which verifies hCaptcha on the server. Supabase keys remain managed by the Edge environment; no `service_role` key is needed in the frontend.
 
-## Scripts utiles
+## Useful scripts
 
-- `scripts/set-version.js` : synchronise la version dans les différents sous-projets ; l’option `--bump` incrémente la version de publication
-- Les commandes `dev` et `start` conservent la version actuelle ; les commandes `build` incrémentent la version avant la compilation
-- `backend/init-db.js` : script d'initialisation de la base
+- `scripts/set-version.js`: synchronizes the version across subprojects; the `--bump` option increments the release version
+- The `dev` and `start` commands keep the current version; the `build` commands increment the version before compiling
+- `backend/init-db.js`: database initialization script
 
-## Contribution
+## Contributing
 
-Bienvenue ! Ouvrez une issue pour proposer des améliorations ou soumettez une pull request avec une description claire des changements.
+Contributions are welcome! Open an issue to suggest an improvement or submit a pull request with a clear description of the changes.
 
-## Licence
+## License
 
-Voir `package.json` pour les informations de licence.
-"# Nexa-Strike" 
-"# Nexa-Strike" 
-"# Nexa-Strike" 
+See `package.json` for license information.

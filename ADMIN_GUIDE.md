@@ -1,132 +1,129 @@
-# Guide d'Édition des Maps - CS2 Utility App
+# CS2 Utility Map Editing Guide
 
-## 🔐 Accès Admin
+## Admin access
 
-### Devenir Admin
+### Becoming an admin
 
-1. **Crée ton compte** sur l'app
-2. **Lance ce script SQL** sur ta base de données pour te rendre admin:
+1. **Create an account** in the app.
+2. **Run this SQL script** against your database to grant yourself admin access:
 
 ```bash
 psql -U postgres cs2_utility < set_admin.sql
 ```
 
-Ou manuellement dans pgAdmin:
+Or run this query manually in pgAdmin:
+
 ```sql
-UPDATE users SET role = 'admin' WHERE email = 'ton_email@example.com';
+UPDATE users SET role = 'admin' WHERE email = 'your_email@example.com';
 ```
 
-### Vérifier que tu es admin
+### Checking your admin status
 
-1. Connecte-toi
-2. Va dans **Profile**
-3. Tu devrais voir un rôle 'admin' (si tu l'ajoutes au profil)
-
----
-
-## 📍 Ajouter des Utility Points
-
-### Accès à l'éditeur
-
-1. Va sur une map (ex: Mirage)
-2. Tu verras un bouton **"✏️ Edit Map"** (visible seulement si tu es admin)
-3. Clique dessus
-
-### Ajouter un point
-
-1. Clique sur **"+ Add Utility Point"**
-2. Remplis le formulaire:
-   - **Name** - Nom du point (ex: "A Site Smoke")
-   - **Type** - Smoke, Molotov, Flash, Grenade, Other
-   - **X Position** - Coordonnée X (optionnel)
-   - **Y Position** - Coordonnée Y (optionnel)
-   - **Description** - Instructions complètes
-   - **Image/Video** - Upload une image ou vidéo de démonstration
-
-3. Clique **"Add Point"**
-
-### Modifier un point
-
-1. Sur la page d'édition, clique sur **"Edit"** sur le point
-2. Modifie les infos
-3. Clique **"Update Point"**
-
-### Supprimer un point
-
-1. Sur la page d'édition, clique sur **"Delete"**
-2. Confirme la suppression
+1. Sign in.
+2. Go to **Profile**.
+3. You should see the `admin` role (if it is displayed in your profile).
 
 ---
 
-## 🎥 Upload de Fichiers
+## Adding utility points
 
-### Format acceptés:
+### Opening the editor
+
+1. Open a map (for example, Mirage).
+2. You will see an **"✏️ Edit Map"** button (visible only to admins).
+3. Click it.
+
+### Adding a point
+
+1. Click **"+ Add Utility Point"**.
+2. Fill in the form:
+   - **Name** — point name (for example, "A Site Smoke")
+   - **Type** — Smoke, Molotov, Flash, Grenade, or Other
+   - **X Position** — X coordinate (optional)
+   - **Y Position** — Y coordinate (optional)
+   - **Description** — full instructions
+   - **Image/Video** — upload a demonstration image or video
+
+3. Click **"Add Point"**.
+
+### Editing a point
+
+1. On the editing page, click **"Edit"** on the point.
+2. Update the details.
+3. Click **"Update Point"**.
+
+### Deleting a point
+
+1. On the editing page, click **"Delete"**.
+2. Confirm the deletion.
+
+---
+
+## File uploads
+
+### Supported formats
 
 **Images:**
 - JPG, JPEG, PNG, GIF
 
-**Vidéos:**
+**Videos:**
 - MP4, WebM
 
-### Où sont stockés les fichiers?
+### File storage
 
-```
+```text
 backend/
 └── uploads/
-    ├── utility/      (images et vidéos des points)
-    ├── clips/        (clips uploadés par les users)
-    └── maps/         (images des maps)
+    ├── utility/      (utility point images and videos)
+    ├── clips/        (clips uploaded by users)
+    └── maps/         (map images)
 ```
 
 ---
 
-## 📊 Positions X, Y
+## X and Y positions
 
-Les positions X et Y sont optionnelles et peuvent servir à:
-- Placer les points sur une carte interactive (si tu ajoutes une carte plus tard)
-- Stocker les coordinates pour une fonctionnalité future
+X and Y positions are optional and can be used to:
+- Place points on an interactive map (if one is added later)
+- Store coordinates for a future feature
 
-Pour le moment, c'est juste du stockage de données.
-
----
-
-## 🚀 Prochaines Étapes
-
-Après avoir rempli les maps avec des points, tu peux:
-
-1. **Ajouter une minimap interactive** - Cliquer sur la carte pour voir les points
-2. **Ajouter un système de notation** - Les users notent les tutoriels
-3. **Ajouter des commentaires** - Discussion sur chaque point
-4. **Catégories avancées** - T vs CT, début/fin de round, etc.
+For now, they are only stored as data.
 
 ---
 
-## ❓ Dépannage
+## Possible next steps
+
+After adding utility points to the maps, you could:
+
+1. **Add an interactive minimap** — click the map to see the points.
+2. **Add a rating system** — users can rate the tutorials.
+3. **Add comments** — discussions for each point.
+4. **Add advanced categories** — T vs. CT, beginning/end of round, etc.
+
+---
+
+## Troubleshooting
 
 ### "Admin access required"
 
-- Vérifier que tu as lancé le script `set_admin.sql`
-- Vérifie dans la base de données: `SELECT * FROM users WHERE email = 'ton_email';`
-- Assure-toi que `role = 'admin'`
+- Make sure you ran the `set_admin.sql` script.
+- Check the database: `SELECT * FROM users WHERE email = 'your_email';`
+- Make sure `role = 'admin'`.
 
-### Les uploads ne fonctionnent pas
+### Uploads are not working
 
-- Vérifie que le dossier `backend/uploads/utility/` existe
-- Sinon crée-le:
+- Check that the `backend/uploads/utility/` directory exists.
+- If it does not, create it:
   ```bash
   mkdir -p backend/uploads/utility
   mkdir -p backend/uploads/maps
   mkdir -p backend/uploads/clips
   ```
 
-### Fichier trop volumineux
+### File is too large
 
-- Limite actuelle: ~50MB
-- Pour augmenter, modifie `backend/src/server.js`:
+- Current limit: approximately 50 MB.
+- To increase it, edit `backend/src/server.js`:
   ```javascript
   app.use(express.json({ limit: '100mb' }));
   ```
-
----
-
-Besoin d'aide? Dis-moi! 🎮
