@@ -35,18 +35,20 @@ const getYouTubeEmbedUrl = (url) => {
   }
 };
 
-const defaultFilters = {
-  smoke: true,
-  molotov: true,
-  flash: true,
-  grenade: true,
-};
-
 const initialFilters = {
   smoke: true,
   molotov: false,
   flash: false,
   grenade: false,
+};
+
+const normalizeFilters = (savedFilters) => {
+  const selectedType = Object.keys(initialFilters).find((type) => (
+    typeof savedFilters?.[type] === 'boolean' ? savedFilters[type] : initialFilters[type]
+  ));
+  return Object.fromEntries(
+    Object.keys(initialFilters).map((type) => [type, type === selectedType]),
+  );
 };
 
 const getMapDetailPreferences = (mapId) => {
@@ -67,12 +69,7 @@ const getMapDetailPreferences = (mapId) => {
 
   const savedFilters = preferences?.filters;
   return {
-    filters: Object.fromEntries(
-      Object.keys(initialFilters).map((type) => [
-        type,
-        typeof savedFilters?.[type] === 'boolean' ? savedFilters[type] : initialFilters[type],
-      ]),
-    ),
+    filters: savedFilters ? normalizeFilters(savedFilters) : initialFilters,
     selectedTeam: ['all', 'ct', 't'].includes(preferences?.selectedTeam) ? preferences.selectedTeam : 'all',
   };
 };
@@ -509,21 +506,12 @@ const MapDetail = () => {
   const activePoint = selectedPoint ? visiblePoints.find((point) => point.id === selectedPoint.id) || visiblePoints[0] || null : null;
 
   const toggleFilter = (type) => {
-    setFilters((prev) => ({ ...prev, [type]: !prev[type] }));
-  };
-
-  const selectAllFilters = () => {
-    setFilters(defaultFilters);
-  };
-
-  const clearAllFilters = () => {
-    setFilters({
-      smoke: false,
-      molotov: false,
-      flash: false,
-      grenade: false,
-      other: false,
-    });
+    setFilters((prev) => Object.fromEntries(
+      Object.keys(initialFilters).map((filterType) => [
+        filterType,
+        filterType === type && !prev[type],
+      ]),
+    ));
   };
 
   const handleMouseDown = (e) => {

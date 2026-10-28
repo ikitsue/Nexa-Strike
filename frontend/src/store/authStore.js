@@ -69,7 +69,10 @@ export const useAuthStore = create((set, get) => {
       return false;
     }
 
-    set({ user: null, token: null, authReady: false });
+    const currentUser = get().user;
+    if (currentUser?.authUserId !== session.user.id) {
+      set({ user: null, token: null, authReady: false });
+    }
 
     try {
       const { data: profile, error } = await supabase

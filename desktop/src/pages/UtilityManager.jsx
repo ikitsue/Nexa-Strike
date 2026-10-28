@@ -342,7 +342,7 @@ const UtilityManager = () => {
     }
 
     fetchMaps();
-  }, [user, navigate, fetchMaps]);
+  }, [user?.id, user?.role, navigate, fetchMaps]);
 
   useEffect(() => {
     if (maps.length === 0) return;
