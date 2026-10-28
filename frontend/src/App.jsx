@@ -14,6 +14,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
 import UtilityManager from './pages/UtilityManager';
+import UtilityDatabase from './pages/UtilityDatabase';
+import UtilityDetail from './pages/UtilityDetail';
 import Download from './pages/Download';
 import Privacy from './pages/Privacy';
 import TermsOfService from './pages/TermsOfService';
@@ -98,6 +100,8 @@ function AppRoutes() {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/maps" element={<Maps />} />
+          <Route path="/db" element={<UtilityDatabase />} />
+          <Route path="/db/:mapId/:pointId" element={<UtilityDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/download" element={<Download />} />

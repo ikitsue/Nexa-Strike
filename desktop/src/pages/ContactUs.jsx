@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { ticketsAPI, achievementsAPI } from '../api/supabaseApi';
 import { useAuthStore } from '../store/authStore';
@@ -18,6 +18,7 @@ const createInitialFormData = (user) => ({
 const ContactUs = () => {
   const { t } = useLanguage();
   const { user } = useAuthStore();
+  const location = useLocation();
   const captchaRef = React.useRef(null);
   const [formData, setFormData] = React.useState(() => createInitialFormData(user));
   const [captchaToken, setCaptchaToken] = React.useState('');
@@ -34,6 +35,26 @@ const ContactUs = () => {
       reporterEmail: user.email,
     }));
   }, [user?.email, user?.username]);
+
+  React.useEffect(() => {
+    const report = location.state?.utilityReport;
+    if (!report) return;
+
+    setFormData((current) => ({
+      ...current,
+      title: `${t('reportNade')}: ${report.pointName}`,
+      category: 'other',
+      message: [
+        `${t('pointName')}: ${report.pointName}`,
+        `${t('map')}: ${report.mapName} (ID: ${report.mapId})`,
+        `${t('utilityType')}: ${t(report.utilityType === 'grenade' ? 'grenade' : report.utilityType)}`,
+        `${t('team')}: ${report.team}`,
+        `Utility ID: ${report.pointId}`,
+        '',
+        t('reportNadeTicketMessage'),
+      ].join('\n'),
+    }));
+  }, [location.state, t]);
 
   const handleChange = (event) => {
     setSubmissionState('');

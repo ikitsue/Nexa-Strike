@@ -14,6 +14,8 @@ const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Admin = lazy(() => import('./pages/Admin'));
 const UtilityManager = lazy(() => import('./pages/UtilityManager'));
+const UtilityDatabase = lazy(() => import('./pages/UtilityDatabase'));
+const UtilityDetail = lazy(() => import('./pages/UtilityDetail'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
@@ -99,6 +101,8 @@ function AppRoutes() {
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/maps" element={<Maps />} />
+            <Route path="/db" element={<UtilityDatabase />} />
+            <Route path="/db/:mapId/:pointId" element={<UtilityDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/download" element={<Navigate to="/" replace />} />

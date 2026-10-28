@@ -26,7 +26,7 @@ const Suggestions = () => {
       const response = await mapsAPI.getAll();
       setMaps(response.data);
       if (response.data.length > 0) {
-        setMapId(response.data[0].id);
+        setMapId((current) => current || String(response.data[0].id));
       }
     } catch (error) {
       console.error('Error fetching maps:', error);

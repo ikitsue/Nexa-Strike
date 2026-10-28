@@ -187,6 +187,33 @@ export const utilityPointsAPI = {
     }
   },
 
+  getByMapIds: async (mapIds) => {
+    if (!mapIds.length) return { data: [] };
+
+    try {
+      const pageSize = 1000;
+      const points = [];
+
+      for (let from = 0; ; from += pageSize) {
+        const { data, error } = await supabase
+          .from('utility_points')
+          .select('*')
+          .in('map_id', mapIds)
+          .order('map_id')
+          .order('id')
+          .range(from, from + pageSize - 1);
+
+        if (error) throw error;
+        points.push(...(data || []));
+        if (!data || data.length < pageSize) break;
+      }
+
+      return { data: points };
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch utility points');
+    }
+  },
+
   create: async (mapId, formData) => {
     try {
       let mediaUrl = null;

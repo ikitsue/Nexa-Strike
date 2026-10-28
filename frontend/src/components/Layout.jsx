@@ -113,6 +113,9 @@ const Layout = () => {
             <Link to="/maps" className="sidebar-link" onClick={closeMenu}>{t('maps')}</Link>
           </li>
           <li>
+            <Link to="/db" className="sidebar-link" onClick={closeMenu}>{t('utilityDatabase')}</Link>
+          </li>
+          <li>
             <Link to="/suggestions" className="sidebar-link" onClick={closeMenu}>{t('suggestions')}</Link>
           </li>
           <li>
