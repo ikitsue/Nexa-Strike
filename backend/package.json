@@ -34,6 +34,7 @@
     "nodemon": "^3.1.14"
   },
   "overrides": {
-    "follow-redirects": "^1.16.1"
+    "follow-redirects": "^1.16.1",
+    "deepmerge": "4.1.2"
   }
 }
