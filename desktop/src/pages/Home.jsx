@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n';
 import './Home.css';
 
 const Home = () => {
   const { t } = useLanguage();
+  const [tutorialStep, setTutorialStep] = useState(0);
+  const tutorialSteps = [1, 2, 3, 4, 5];
+  const currentTutorialStep = tutorialSteps[tutorialStep];
+  const tutorialVideoName = currentTutorialStep === 5
+    ? 'step -5.mp4'
+    : `step-${currentTutorialStep}.mp4`;
+  const tutorialVideo = `${import.meta.env.BASE_URL}videos/tutorial/${encodeURIComponent(tutorialVideoName)}`;
 
   return (
     <div className="home">
@@ -30,6 +37,73 @@ const Home = () => {
           <Link to="/maps" className="btn-primary">
             🗺️ {t('maps')}
           </Link>
+        </div>
+      </section>
+
+      <section className="home-tutorial" aria-labelledby="home-tutorial-title">
+        <div className="home-tutorial-heading">
+          <div>
+            <h2 id="home-tutorial-title">{t('homeTutorialTitle')}</h2>
+            <p>{t('homeTutorialIntro')}</p>
+          </div>
+        </div>
+        <div className="home-tutorial-panel">
+          <div className="home-tutorial-screenshot">
+            <video
+              key={tutorialVideo}
+              className="home-tutorial-video"
+              controls
+              playsInline
+              preload="metadata"
+              aria-label={`${t('homeTutorialStepLabel')} ${tutorialStep + 1}: ${t(`homeTutorialStep${currentTutorialStep}Title`)}`}
+            >
+              <source src={tutorialVideo} type="video/mp4" />
+            </video>
+          </div>
+          <div className="home-tutorial-guide" aria-live="polite">
+            <div className="home-tutorial-bot">
+              <span className="home-tutorial-bot-avatar" aria-hidden="true">🤖</span>
+              <div className="home-tutorial-bot-message">
+                <span className="home-tutorial-bot-name">{t('homeTutorialBotName')}</span>
+                <span className="home-tutorial-step-count">
+                  {t('homeTutorialStepLabel')} {tutorialStep + 1} / {tutorialSteps.length}
+                </span>
+                <h3>{t(`homeTutorialStep${currentTutorialStep}Title`)}</h3>
+                <p>{t(`homeTutorialStep${currentTutorialStep}Desc`)}</p>
+              </div>
+            </div>
+            <div className="home-tutorial-progress" aria-hidden="true">
+              {tutorialSteps.map((step, index) => (
+                <span
+                  className={`home-tutorial-progress-segment${index <= tutorialStep ? ' is-active' : ''}`}
+                  key={step}
+                />
+              ))}
+            </div>
+            <div className="home-tutorial-controls">
+              <button
+                type="button"
+                className="home-tutorial-button home-tutorial-button--secondary"
+                onClick={() => setTutorialStep((currentStep) => Math.max(0, currentStep - 1))}
+                disabled={tutorialStep === 0}
+              >
+                ← {t('homeTutorialPrevious')}
+              </button>
+              {tutorialStep === tutorialSteps.length - 1 ? (
+                <Link to="/maps" className="home-tutorial-button home-tutorial-button--primary">
+                  🗺️ {t('maps')}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="home-tutorial-button home-tutorial-button--primary"
+                  onClick={() => setTutorialStep((currentStep) => currentStep + 1)}
+                >
+                  {t('homeTutorialNext')} →
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
