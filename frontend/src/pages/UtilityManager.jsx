@@ -55,6 +55,7 @@ const UtilityManager = () => {
   const [isPlacingLineGroup, setIsPlacingLineGroup] = useState(false);
   const [selectedParentZone, setSelectedParentZone] = useState(null);
   const [selectedLineGroup, setSelectedLineGroup] = useState(null);
+  const [selectedLinePoint, setSelectedLinePoint] = useState(null);
   const [utilityFilters, setUtilityFilters] = useState(() => getUtilityManagerPreferences(mapQueryId).utilityFilters);
   const [activePlacementType, setActivePlacementType] = useState('smoke');
   const [selectedPlacementTeam, setSelectedPlacementTeam] = useState('t');
@@ -163,9 +164,11 @@ const UtilityManager = () => {
     return match ? Number(match[1]) : null;
   };
 
+  const hasPointId = (point, id) => point?.id != null && id != null && String(point.id) === String(id);
+
   const getPointPosition = (point) => {
     if (point.utility_type !== 'line_group') {
-      const parent = mapDetails?.utility_points.find((candidate) => candidate.id === getParentIdFromPoint(point));
+      const parent = mapDetails?.utility_points.find((candidate) => hasPointId(candidate, getParentIdFromPoint(point)));
       if (parent?.utility_type === 'line_group') return parent;
     }
 
@@ -184,66 +187,128 @@ const UtilityManager = () => {
 
   const isLineRelatedToParent = (linePoint, parentZone) => {
     if (!linePoint || !parentZone) return false;
-    return getParentIdFromPoint(linePoint) === parentZone.id;
+    const parentId = getParentIdFromPoint(linePoint);
+    if (parentId != null) return hasPointId(parentZone, parentId);
+    const parentCandidates = (mapDetails?.utility_points || []).filter((candidate) => (
+      candidate.utility_type !== 'line' && candidate.utility_type !== 'line_group'
+    ));
+    const nearestParent = parentCandidates.reduce((nearest, candidate) => {
+      const distance = Math.hypot(candidate.x - linePoint.x, candidate.y - linePoint.y);
+      return !nearest || distance < nearest.distance ? { point: candidate, distance } : nearest;
+    }, null)?.point;
+    return hasPointId(nearestParent, parentZone.id);
   };
 
   const isGroupChild = (point, group) => (
     point
     && group
-    && point.id !== group.id
+    && group.utility_type === 'line_group'
+    && !hasPointId(point, group.id)
     && point.utility_type !== 'line_group'
-    && getParentIdFromPoint(point) === group.id
+    && hasPointId(group, getParentIdFromPoint(point))
   );
 
-  const isPointVisible = (point) => {
-    if (selectedTeam !== 'all' && normalizeTeam(point.team) !== selectedTeam) return false;
+  const isGroupChildOfParent = (point, parentZone) => mapDetails?.utility_points.some((group) => (
+    group.utility_type === 'line_group'
+    && hasPointId(parentZone, getParentIdFromPoint(group))
+    && isGroupChild(point, group)
+  ));
 
+  const getNearestParentForPoint = (point) => {
+    const parentCandidates = (mapDetails?.utility_points || []).filter((candidate) => (
+      candidate.utility_type !== 'line' && candidate.utility_type !== 'line_group'
+    ));
+    return parentCandidates.reduce((nearest, candidate) => {
+      const distance = Math.hypot(candidate.x - point.x, candidate.y - point.y);
+      return !nearest || distance < nearest.distance ? { point: candidate, distance } : nearest;
+    }, null)?.point || null;
+  };
+
+  const selectedLinePointGroup = selectedLinePoint
+    ? mapDetails?.utility_points.find((candidate) => isGroupChild(selectedLinePoint, candidate)) || null
+    : null;
+  const selectedLinePointParentId = getParentIdFromPoint(selectedLinePointGroup || selectedLinePoint);
+  const selectedLinePointParent = selectedLinePoint
+    ? mapDetails?.utility_points.find((candidate) => (
+      hasPointId(candidate, selectedLinePointParentId)
+      && candidate.utility_type !== 'line_group'
+      && candidate.utility_type !== 'line'
+    )) || (selectedLinePointGroup ? null : getNearestParentForPoint(selectedLinePoint))
+    : null;
+
+  const isPointVisible = (point) => {
     if (isPlacingLineGroup) {
+      if (selectedTeam !== 'all' && normalizeTeam(point.team) !== selectedTeam) return false;
       return point.utility_type !== 'line' && point.utility_type !== 'line_group';
     }
 
     if (isPlacingLine) {
+      if (selectedTeam !== 'all' && normalizeTeam(point.team) !== selectedTeam) return false;
       if (selectedLineGroup) {
-        return point.id === selectedLineGroup.id
-          || (selectedParentZone && point.id === selectedParentZone.id)
+        return hasPointId(point, selectedLineGroup.id)
+          || (selectedParentZone && hasPointId(point, selectedParentZone.id))
           || isGroupChild(point, selectedLineGroup);
       }
 
       return selectedParentZone && (
-        point.id === selectedParentZone.id
+        hasPointId(point, selectedParentZone.id)
         || (point.utility_type === 'line' && isLineRelatedToParent(point, selectedParentZone))
       );
     }
 
-    if (selectedParentZone) {
-      if (point.id === selectedParentZone.id) return true;
+    if (selectedLinePoint) {
+      if (hasPointId(point, selectedLinePoint.id)) return true;
+      if (selectedLinePointGroup && (
+        hasPointId(point, selectedLinePointGroup.id)
+        || isGroupChild(point, selectedLinePointGroup)
+      )) return true;
+      if (!selectedLinePointParent) return false;
+      if (hasPointId(point, selectedLinePointParent.id)) return true;
       if (point.utility_type === 'line_group') {
-        return getParentIdFromPoint(point) === selectedParentZone.id;
-      }
-      if (selectedLineGroup && (point.id === selectedLineGroup.id || isGroupChild(point, selectedLineGroup))) {
-        return true;
+        return hasPointId(selectedLinePointParent, getParentIdFromPoint(point));
       }
       if (point.utility_type === 'line') {
-        return selectedLineGroup
-          ? isGroupChild(point, selectedLineGroup)
-          : isLineRelatedToParent(point, selectedParentZone);
+        return isLineRelatedToParent(point, selectedLinePointParent)
+          || isGroupChildOfParent(point, selectedLinePointParent);
       }
       return false;
     }
 
-    if (selectedLineGroup && (point.id === selectedLineGroup.id || isGroupChild(point, selectedLineGroup))) {
+    if (selectedParentZone) {
+      if (hasPointId(point, selectedParentZone.id)) return true;
+      if (point.utility_type === 'line_group') {
+        return hasPointId(selectedParentZone, getParentIdFromPoint(point));
+      }
+      if (selectedLineGroup && (hasPointId(point, selectedLineGroup.id) || isGroupChild(point, selectedLineGroup))) {
+        return true;
+      }
+      if (point.utility_type === 'line') {
+        return isLineRelatedToParent(point, selectedParentZone)
+          || isGroupChildOfParent(point, selectedParentZone);
+      }
+      return false;
+    }
+
+    if (selectedLineGroup && (hasPointId(point, selectedLineGroup.id) || isGroupChild(point, selectedLineGroup))) {
       return true;
     }
+
+    if (selectedTeam !== 'all' && normalizeTeam(point.team) !== selectedTeam) return false;
 
     if (point.utility_type === 'line') {
       return (selectedLineGroup && isLineRelatedToParent(point, selectedLineGroup))
         || (selectedParentZone && isLineRelatedToParent(point, selectedParentZone));
     }
-
-    if (point.utility_type === 'line_group') return selectedParentZone && getParentIdFromPoint(point) === selectedParentZone.id;
-    if (selectedParentZone && point.id === selectedParentZone.id) return true;
+    if (point.utility_type === 'line_group') return selectedParentZone && hasPointId(selectedParentZone, getParentIdFromPoint(point));
+    if (selectedParentZone && hasPointId(point, selectedParentZone.id)) return true;
     return utilityFilters[point.utility_type] !== false;
   };
+
+  const visibleExistingPoints = (mapDetails?.utility_points || []).filter((point) => (
+    selectedLinePoint
+      ? hasPointId(point, selectedLinePoint.id)
+      : isPointVisible(point)
+  ));
 
   const mapConnectors = selectedParentZone
     ? [
@@ -251,7 +316,7 @@ const UtilityManager = () => {
         .filter((point) => point.utility_type === 'line' && isLineRelatedToParent(point, selectedParentZone))
         .map((point) => ({ point, parent: selectedParentZone })),
       ...(mapDetails?.utility_points || [])
-        .filter((point) => point.utility_type === 'line_group' && getParentIdFromPoint(point) === selectedParentZone.id)
+        .filter((point) => point.utility_type === 'line_group' && hasPointId(selectedParentZone, getParentIdFromPoint(point)))
         .map((point) => ({ point, parent: selectedParentZone })),
     ]
     : [];
@@ -362,6 +427,7 @@ const UtilityManager = () => {
     setSelectedMap(requestedMap.id);
     setSelectedParentZone(null);
     setSelectedLineGroup(null);
+    setSelectedLinePoint(null);
     fetchMapDetails(requestedMap.id);
   }, [maps, mapQueryId, searchParams, setSearchParams, fetchMapDetails]);
 
@@ -369,6 +435,7 @@ const UtilityManager = () => {
     setSelectedMap(mapId);
     setSelectedParentZone(null);
     setSelectedLineGroup(null);
+    setSelectedLinePoint(null);
     setShowForm(false);
     setIsPlacingLine(false);
     setIsPlacingLineGroup(false);
@@ -616,6 +683,7 @@ const UtilityManager = () => {
     if (!isPlacingMarker && !isPlacingLine && !isPlacingLineGroup) {
       setSelectedParentZone(null);
       setSelectedLineGroup(null);
+      setSelectedLinePoint(null);
       return;
     }
 
@@ -1216,15 +1284,31 @@ const UtilityManager = () => {
                                 onClick={(ev) => {
                                   ev.stopPropagation();
                                   if (point.utility_type === 'line_group') {
+                                    setSelectedLinePoint(null);
                                     setSelectedLineGroup(point);
                                     const parentId = getParentIdFromPoint(point);
-                                    setSelectedParentZone(mapDetails.utility_points.find((candidate) => candidate.id === parentId) || null);
+                                    setSelectedParentZone(mapDetails.utility_points.find((candidate) => hasPointId(candidate, parentId)) || null);
+                                  } else if (point.utility_type === 'line') {
+                                    setSelectedLinePoint(point);
+                                    const group = mapDetails.utility_points.find((candidate) => isGroupChild(point, candidate));
+                                    const parentId = getParentIdFromPoint(group || point);
+                                    const parent = mapDetails.utility_points.find((candidate) => (
+                                      hasPointId(candidate, parentId)
+                                      && candidate.utility_type !== 'line_group'
+                                      && candidate.utility_type !== 'line'
+                                    ));
+                                    const nearestParent = group || parent
+                                      ? null
+                                      : getNearestParentForPoint(point);
+                                    setSelectedLineGroup(group || null);
+                                    setSelectedParentZone(parent || nearestParent || null);
                                   } else if (point.utility_type !== 'line') {
+                                    setSelectedLinePoint(null);
                                     const group = mapDetails.utility_points.find((candidate) => isGroupChild(point, candidate));
                                     if (group) {
                                       setSelectedLineGroup(group);
                                       const parentId = getParentIdFromPoint(group);
-                                      setSelectedParentZone(mapDetails.utility_points.find((candidate) => candidate.id === parentId) || null);
+                                      setSelectedParentZone(mapDetails.utility_points.find((candidate) => hasPointId(candidate, parentId)) || null);
                                     } else {
                                       setSelectedParentZone(point);
                                       setSelectedLineGroup(null);
@@ -1309,15 +1393,14 @@ const UtilityManager = () => {
 
               {/* Liste des points */}
               <div className="points-management">
-                <h3>{t('existingPointsTitle')} ({mapDetails.utility_points.length})</h3>
+                <h3>{t('existingPointsTitle')} ({visibleExistingPoints.length})</h3>
                 <div className="points-list">
-                  {mapDetails.utility_points.length === 0 ? (
+                  {visibleExistingPoints.length === 0 ? (
                     <div className="empty-state">
                       <p>{t('noPointsForMap')}</p>
                     </div>
                   ) : (
-                    mapDetails.utility_points
-                      .filter(isPointVisible)
+                    visibleExistingPoints
                       .map((point) => (
                       <div key={point.id} className="point-card">
                         <div className="point-info">
