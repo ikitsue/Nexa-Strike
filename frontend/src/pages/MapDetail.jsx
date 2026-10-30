@@ -123,6 +123,8 @@ const MapDetail = () => {
   const zoomRef = useRef(100);
   const panRef = useRef({ x: 0, y: 0 });
   const isMapHoverRef = useRef(false);
+  const didDragMapRef = useRef(false);
+  const dragPointerStartRef = useRef({ x: 0, y: 0 });
   const [mapsList, setMapsList] = useState([]);
   const [mapsOpen, setMapsOpen] = useState(false);
   const mapsDropdownRef = useRef(null);
@@ -267,6 +269,15 @@ const MapDetail = () => {
     if (!isDragging) return undefined;
 
     const handleMouseMove = (e) => {
+      if (
+        Math.hypot(
+          e.clientX - dragPointerStartRef.current.x,
+          e.clientY - dragPointerStartRef.current.y,
+        ) > 3
+      ) {
+        didDragMapRef.current = true;
+      }
+
       const nextPanX = e.clientX - dragStart.x;
       const nextPanY = e.clientY - dragStart.y;
       setPanX(nextPanX);
@@ -528,6 +539,8 @@ const MapDetail = () => {
   const handleMouseDown = (e) => {
     if (e.button === 0) {
       e.preventDefault();
+      didDragMapRef.current = false;
+      dragPointerStartRef.current = { x: e.clientX, y: e.clientY };
       setIsDragging(true);
       setDragStart({ x: e.clientX - panRef.current.x, y: e.clientY - panRef.current.y });
     }
@@ -695,7 +708,13 @@ const MapDetail = () => {
               <div className="map-stage-layer">
                 <div
                   className="map-stage-inner"
-                  onClick={() => setSelectedPoint(null)}
+                  onClick={() => {
+                    if (didDragMapRef.current) {
+                      didDragMapRef.current = false;
+                      return;
+                    }
+                    setSelectedPoint(null);
+                  }}
                   style={{
                     transform: `rotate(${rotation}deg) scale(${zoom / 100}) translate(${panX}px, ${panY}px)`,
                     transformOrigin: 'center center',
@@ -737,6 +756,10 @@ const MapDetail = () => {
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (didDragMapRef.current) {
+                            didDragMapRef.current = false;
+                            return;
+                          }
                           setSelectedPoint(point);
                         }}
                         title={point.name}
