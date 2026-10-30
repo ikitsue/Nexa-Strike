@@ -453,24 +453,6 @@ const UtilityDatabase = () => {
                         </Link>
                       </div>
                     ) : null}
-                    {point.utility_type === 'line' && (point.zoom_in_image_url || point.zoom_out_image_url) && (
-                      <div className="utility-database__zoom-images">
-                        {[
-                          { key: 'zoom_in', url: point.zoom_in_image_url },
-                          { key: 'zoom_out', url: point.zoom_out_image_url },
-                        ].filter((image) => image.url).map(({ key, url }) => (
-                          <figure className="utility-database__zoom-item" key={key}>
-                            <figcaption>{t(key === 'zoom_in' ? 'lineZoomInImage' : 'lineZoomOutImage')}</figcaption>
-                            <img
-                              className="utility-database__zoom-image"
-                              src={getFileUrl(url)}
-                              alt={`${point.name || t('unknown')} - ${t(key === 'zoom_in' ? 'lineZoomInImage' : 'lineZoomOutImage')}`}
-                              loading="lazy"
-                            />
-                          </figure>
-                        ))}
-                      </div>
-                    )}
                     {!videoUrl && !point.image_url && (
                       <div className="utility-database__links">
                         <Link className="utility-database__open-page" to={`/db/${point.map_id}/${point.id}`}>
