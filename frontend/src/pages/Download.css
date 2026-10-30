@@ -51,10 +51,57 @@
 
 .download-buttons {
   display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 16px;
   justify-content: center;
-  margin-top: 25px;
+  margin-top: 20px;
+}
+
+.download-release-status {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+}
+
+.download-release-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+.download-release-card > div {
+  display: grid;
+  gap: 6px;
+}
+
+.download-platform {
+  font-size: 1.15em;
+  font-weight: 750;
+}
+
+.download-version {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95em;
+}
+
+.download-release-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 122, 36, 0.14);
+  border: 1px solid rgba(255, 190, 130, 0.55);
+  border-radius: 8px;
+}
+
+.download-release-error p {
+  margin: 0;
 }
 
 .btn-download {
@@ -70,6 +117,11 @@
   transition: all 0.3s ease;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.download-release-error .btn-download {
+  flex: 0 0 auto;
+  font-family: inherit;
 }
 
 .btn-download:hover {
@@ -188,8 +240,14 @@
   }
 
   .download-buttons {
-    flex-direction: column;
     gap: 12px;
+  }
+
+  .download-release-card,
+  .download-release-error {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
   }
 
   .btn-download {

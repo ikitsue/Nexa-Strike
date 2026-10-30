@@ -8,7 +8,51 @@ const Download = () => {
   const { t } = useLanguage();
   const { user } = useAuthStore();
   const [achievementError, setAchievementError] = React.useState(false);
-  const desktopUrl = 'https://github.com/ikitsue/NexaStrike/releases';
+  const [release, setRelease] = React.useState({ status: 'loading' });
+  const [reloadAttempt, setReloadAttempt] = React.useState(0);
+
+  const loadLatestRelease = React.useCallback(async (signal) => {
+    setRelease({ status: 'loading' });
+
+    try {
+      const response = await fetch('https://api.github.com/repos/ikitsue/Nexa-Strike/releases/latest', {
+        headers: { Accept: 'application/vnd.github+json' },
+        cache: 'no-store',
+        signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to load the latest desktop release (${response.status}).`);
+      }
+
+      const latestRelease = await response.json();
+      const version = /^v?(\d+\.\d+\.\d+)$/.exec(latestRelease.tag_name || '')?.[1];
+      const installer = version
+        ? latestRelease.assets?.find((asset) => asset.name === `NexaStrike-Setup-${version}.exe`)
+        : null;
+
+      if (!installer || !/^https:\/\/github\.com\/ikitsue\/Nexa-Strike\/releases\/download\//.test(installer.browser_download_url)) {
+        setRelease({ status: 'unavailable' });
+        return;
+      }
+
+      setRelease({
+        status: 'available',
+        version,
+        downloadUrl: installer.browser_download_url,
+      });
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      console.error('Could not load the latest NexaStrike desktop release:', error);
+      setRelease({ status: 'error' });
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    loadLatestRelease(controller.signal);
+    return () => controller.abort();
+  }, [loadLatestRelease, reloadAttempt]);
 
   const handleDesktopClick = async () => {
     if (!user?.authUserId) return;
@@ -31,48 +75,49 @@ const Download = () => {
           <h2>{t('getDesktopApp')}</h2>
           <p>{t('desktopDescription')}</p>
 
-          <p className="download-notice" role="status">
-            {t('desktopNotReady')}
-          </p>
-          
           <div className="download-buttons">
             {achievementError && (
               <p className="download-notice" role="alert">{t('desktopAchievementError')}</p>
             )}
-            <a 
-              href={`${desktopUrl}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn-download"
-              onClick={handleDesktopClick}
-            >
-              📦 Windows
-            </a>
-            <a 
-              href={`${desktopUrl}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn-download"
-              onClick={handleDesktopClick}
-            >
-              🍎 macOS
-            </a>
-            <a 
-              href={`${desktopUrl}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn-download"
-              onClick={handleDesktopClick}
-            >
-              🐧 Linux
-            </a>
+            {release.status === 'loading' && (
+              <p className="download-release-status" role="status">{t('checkingDesktopRelease')}</p>
+            )}
+            {release.status === 'available' && (
+              <div className="download-release-card">
+                <div>
+                  <span className="download-platform">{t('windows')}</span>
+                  <span className="download-version">{t('latestDesktopVersion').replace('{version}', release.version)}</span>
+                </div>
+                <a
+                  href={release.downloadUrl}
+                  className="btn-download"
+                  onClick={handleDesktopClick}
+                >
+                  📦 {t('downloadForWindows')}
+                </a>
+              </div>
+            )}
+            {release.status === 'unavailable' && (
+              <p className="download-notice" role="status">{t('desktopReleaseUnavailable')}</p>
+            )}
+            {release.status === 'error' && (
+              <div className="download-release-error" role="alert">
+                <p>{t('desktopReleaseLoadError')}</p>
+                <button
+                  type="button"
+                  className="btn-download"
+                  onClick={() => setReloadAttempt((attempt) => attempt + 1)}
+                >
+                  {t('retryDesktopRelease')}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="download-section">
           <h2>{t('features')}</h2>
           <ul className="features-list">
-            <li>✅ {t('offlineFunctionality')}</li>
             <li>✅ {t('directSystemIntegration')}</li>
             <li>✅ {t('improvedPerformance')}</li>
             <li>✅ {t('nativeNotifications')}</li>
