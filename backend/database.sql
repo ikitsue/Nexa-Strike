@@ -31,6 +31,8 @@ CREATE TABLE utility_points (
   description TEXT,
   video_url VARCHAR(255),
   image_url VARCHAR(255),
+  zoom_in_image_url TEXT,
+  zoom_out_image_url TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

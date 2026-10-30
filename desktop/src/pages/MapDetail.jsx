@@ -106,6 +106,7 @@ const MapDetail = () => {
   const [map, setMap] = useState(null);
   const [points, setPoints] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
+  const [lineImageView, setLineImageView] = useState('zoom_in');
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(() => getMapDetailPreferences(id).filters);
   const [zoom, setZoom] = useState(100);
@@ -173,6 +174,10 @@ const MapDetail = () => {
   useEffect(() => {
     panRef.current = { x: panX, y: panY };
   }, [panX, panY]);
+
+  useEffect(() => {
+    setLineImageView('zoom_in');
+  }, [selectedPoint?.id]);
 
   const orderMaps = (mapsList) => {
     const mapPool = ['ancient', 'anubis', 'dust ii', 'inferno', 'cache', 'nuke', 'mirage'];
@@ -504,6 +509,13 @@ const MapDetail = () => {
       : [];
 
   const activePoint = selectedPoint ? visiblePoints.find((point) => point.id === selectedPoint.id) || visiblePoints[0] || null : null;
+  const lineZoomImages = activePoint?.utility_type === 'line'
+    ? [
+      { key: 'zoom_in', url: activePoint.zoom_in_image_url },
+      { key: 'zoom_out', url: activePoint.zoom_out_image_url },
+    ].filter((image) => image.url)
+    : [];
+  const activeLineImage = lineZoomImages.find((image) => image.key === lineImageView) || lineZoomImages[0];
 
   const toggleFilter = (type) => {
     setFilters((prev) => Object.fromEntries(
@@ -814,7 +826,42 @@ const MapDetail = () => {
                   })()}
                 </div>
 
-                {activePoint.image_url && !activePoint.image_url.match(/\.(mp4|webm|mov|avi|mkv)$/i) && (
+                {lineZoomImages.length > 0 && (
+                  <div className="line-zoom-image-viewer">
+                    <div className="line-zoom-image-tabs" role="group" aria-label={t('lineZoomImages')}>
+                      {lineZoomImages.map((image) => (
+                        <button
+                          key={image.key}
+                          type="button"
+                          className={`line-zoom-image-tab${activeLineImage?.key === image.key ? ' active' : ''}`}
+                          aria-pressed={activeLineImage?.key === image.key}
+                          onClick={() => setLineImageView(image.key)}
+                        >
+                          {t(image.key === 'zoom_in' ? 'lineZoomInImage' : 'lineZoomOutImage')}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="line-zoom-image-frame">
+                      <span className="line-zoom-image-label">
+                        {t(activeLineImage.key === 'zoom_in' ? 'lineZoomInImage' : 'lineZoomOutImage')}
+                      </span>
+                      <img
+                        src={getFileUrl(activeLineImage.url)}
+                        alt={`${activePoint.name} - ${t(activeLineImage.key === 'zoom_in' ? 'lineZoomInImage' : 'lineZoomOutImage')}`}
+                        className="detail-image line-zoom-image"
+                        onError={(event) => {
+                          const fallbacks = getFileUrlFallbacks(activeLineImage.url);
+                          const next = fallbacks[1];
+                          if (next && event.currentTarget.src !== next) event.currentTarget.src = next;
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activePoint.image_url
+                  && (activePoint.utility_type !== 'line' || lineZoomImages.length === 0)
+                  && !activePoint.image_url.match(/\.(mp4|webm|mov|avi|mkv)$/i) && (
                   <img
                     src={getFileUrl(activePoint.image_url)}
                     alt={activePoint.name}

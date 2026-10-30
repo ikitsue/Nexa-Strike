@@ -29,11 +29,12 @@ const getUtilityManagerPreferences = (mapId) => {
   }
 
   const savedFilters = preferences?.utilityFilters;
+  const selectedType = Object.keys(initialUtilityFilters).find((type) => savedFilters?.[type] === true) || 'smoke';
   return {
     utilityFilters: Object.fromEntries(
       Object.keys(initialUtilityFilters).map((type) => [
         type,
-        typeof savedFilters?.[type] === 'boolean' ? savedFilters[type] : initialUtilityFilters[type],
+        type === selectedType,
       ]),
     ),
     selectedTeam: ['all', 'ct', 't'].includes(preferences?.selectedTeam) ? preferences.selectedTeam : 'all',
@@ -113,6 +114,10 @@ const UtilityManager = () => {
     team: 't',
     parent_id: null,
     file: null,
+    zoom_in_file: null,
+    zoom_out_file: null,
+    zoom_in_image_url: '',
+    zoom_out_image_url: '',
     video_url: '',
   });
 
@@ -468,7 +473,7 @@ const UtilityManager = () => {
   const handleFormChange = (e) => {
     const { name, value, files } = e.target;
     if (files) {
-      setPointForm({ ...pointForm, file: files[0] });
+      setPointForm((previous) => ({ ...previous, [name]: files[0] || null }));
     } else {
       setPointForm({ ...pointForm, [name]: value });
     }
@@ -520,6 +525,10 @@ const UtilityManager = () => {
       } else if (pointForm.video_url) {
         formData.append('video_url', pointForm.video_url.trim());
       }
+      if (pointForm.utility_type === 'line') {
+        if (pointForm.zoom_in_file) formData.append('zoom_in_file', pointForm.zoom_in_file);
+        if (pointForm.zoom_out_file) formData.append('zoom_out_file', pointForm.zoom_out_file);
+      }
       formData.append('team', pointForm.team || 't');
 
       if (editingPointId) {
@@ -568,6 +577,10 @@ const UtilityManager = () => {
       parent_id: metadata.parent_id || null,
       team: point.team || 't',
       file: null,
+      zoom_in_file: null,
+      zoom_out_file: null,
+      zoom_in_image_url: point.zoom_in_image_url || '',
+      zoom_out_image_url: point.zoom_out_image_url || '',
       video_url: point.video_url || '',
     });
     setShowForm(true);
@@ -813,6 +826,40 @@ const UtilityManager = () => {
                       {pointForm.utility_type === 'line' && (
                         <>
                           <div className="form-group">
+                            <label htmlFor="lineZoomInImage">{t('lineZoomInImage')}</label>
+                            <input
+                              id="lineZoomInImage"
+                              type="file"
+                              name="zoom_in_file"
+                              onChange={handleFormChange}
+                              accept="image/*"
+                            />
+                            {pointForm.zoom_in_image_url && (
+                              <img
+                                className="line-image-preview"
+                                src={getFileUrl(pointForm.zoom_in_image_url)}
+                                alt={t('lineZoomInImage')}
+                              />
+                            )}
+                          </div>
+                          <div className="form-group">
+                            <label htmlFor="lineZoomOutImage">{t('lineZoomOutImage')}</label>
+                            <input
+                              id="lineZoomOutImage"
+                              type="file"
+                              name="zoom_out_file"
+                              onChange={handleFormChange}
+                              accept="image/*"
+                            />
+                            {pointForm.zoom_out_image_url && (
+                              <img
+                                className="line-image-preview"
+                                src={getFileUrl(pointForm.zoom_out_image_url)}
+                                alt={t('lineZoomOutImage')}
+                              />
+                            )}
+                          </div>
+                          <div className="form-group">
                             <label>{t('jumpThrow')}</label>
                             <select name="jump_throw" value={pointForm.jump_throw} onChange={handleFormChange}>
                               <option value="yes">{t('jumpThrowYes')}</option>
@@ -889,15 +936,17 @@ const UtilityManager = () => {
                         </div>
                       )}
 
-                      <div className="form-group">
-                        <label>{t('imageVideoLabel')}</label>
-                        <input
-                          type="file"
-                          name="file"
-                          onChange={handleFormChange}
-                          accept="image/*,video/*"
-                        />
-                      </div>
+                      {pointForm.utility_type !== 'line' && (
+                        <div className="form-group">
+                          <label>{t('imageVideoLabel')}</label>
+                          <input
+                            type="file"
+                            name="file"
+                            onChange={handleFormChange}
+                            accept="image/*,video/*"
+                          />
+                        </div>
+                      )}
 
                       <div className="form-actions">
                         <button type="submit" className="btn-submit">
@@ -1050,10 +1099,13 @@ const UtilityManager = () => {
                         <button
                           key={type}
                           className={`filter-btn ${utilityFilters[type] ? 'active' : ''}`}
-                          onClick={() => setUtilityFilters((previous) => ({
-                            ...previous,
-                            [type]: !previous[type],
-                          }))}
+                          aria-pressed={Boolean(utilityFilters[type])}
+                          onClick={() => setUtilityFilters(Object.fromEntries(
+                            Object.keys(initialUtilityFilters).map((utilityType) => [
+                              utilityType,
+                              utilityType === type,
+                            ]),
+                          ))}
                         >
                           {icon} {t(type)}
                           <span className="filter-count">

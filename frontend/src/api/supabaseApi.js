@@ -20,6 +20,22 @@ const sanitizeStorageFileName = (fileName) => {
   return `${truncatedBase}${extension}`.toLowerCase();
 };
 
+const uploadLineImage = async (file) => {
+  if (!file) return null;
+  if (file.type && !file.type.startsWith('image/')) {
+    throw new Error('Line zoom images must be image files');
+  }
+
+  const safeFileName = sanitizeStorageFileName(file.name || 'line-image');
+  const uniquePrefix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const { data, error } = await supabase.storage
+    .from('utility-points')
+    .upload(`line-images/${uniquePrefix}-${safeFileName}`, file);
+
+  if (error) throw error;
+  return data.path;
+};
+
 // Auth API
 export const authAPI = {
   register: async (email, password, username, captchaToken) => {
@@ -250,6 +266,10 @@ export const utilityPointsAPI = {
         image_url: imageUrl,
         video_url: videoUrl || externalVideoUrl,
       };
+      if (formData.get('utility_type') === 'line') {
+        insertData.zoom_in_image_url = await uploadLineImage(formData.get('zoom_in_file'));
+        insertData.zoom_out_image_url = await uploadLineImage(formData.get('zoom_out_file'));
+      }
       const teamValue = formData.get('team');
       if (teamValue) insertData.team = teamValue;
 
@@ -297,6 +317,12 @@ export const utilityPointsAPI = {
       };
       if (formData.has('suggested_by')) {
         updateData.suggested_by = formData.get('suggested_by').trim() || null;
+      }
+      if (formData.get('utility_type') === 'line') {
+        const zoomInImageUrl = await uploadLineImage(formData.get('zoom_in_file'));
+        const zoomOutImageUrl = await uploadLineImage(formData.get('zoom_out_file'));
+        if (zoomInImageUrl) updateData.zoom_in_image_url = zoomInImageUrl;
+        if (zoomOutImageUrl) updateData.zoom_out_image_url = zoomOutImageUrl;
       }
       const teamValue = formData.get('team');
       if (teamValue) updateData.team = teamValue;
