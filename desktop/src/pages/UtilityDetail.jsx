@@ -206,17 +206,23 @@ const UtilityDetail = () => {
     }
   };
 
-  const renderImage = (url) => (
+  const renderImage = (url, alt = point.name || '') => (
     <img
       className="utility-detail__image"
       src={getFileUrl(url)}
-      alt={point.name || ''}
+      alt={alt}
       onError={(event) => {
         const fallback = getFileUrlFallbacks(url)[1];
         if (fallback && event.currentTarget.src !== fallback) event.currentTarget.src = fallback;
       }}
     />
   );
+  const lineZoomImages = point.utility_type === 'line'
+    ? [
+      { key: 'zoom_in', url: point.zoom_in_image_url },
+      { key: 'zoom_out', url: point.zoom_out_image_url },
+    ].filter((image) => image.url)
+    : [];
 
   return (
     <main className="utility-detail">
@@ -273,6 +279,20 @@ const UtilityDetail = () => {
               <div className="utility-detail__media-empty">{t('utilityMediaUnavailable')}</div>
             )}
           </section>
+
+          {lineZoomImages.length > 0 && (
+            <section className="utility-detail__zoom-gallery" aria-label={t('lineZoomImages')}>
+              {lineZoomImages.map(({ key, url }) => {
+                const label = t(key === 'zoom_in' ? 'lineZoomInImage' : 'lineZoomOutImage');
+                return (
+                  <figure className="utility-detail__zoom-item" key={key}>
+                    <figcaption>{label}</figcaption>
+                    {renderImage(url, `${point.name} - ${label}`)}
+                  </figure>
+                );
+              })}
+            </section>
+          )}
 
           <div className="utility-detail__tags">
             <span className={`utility-detail__tag utility-detail__tag--${category}`}>{t(category === 'grenade' ? 'grenade' : category)}</span>

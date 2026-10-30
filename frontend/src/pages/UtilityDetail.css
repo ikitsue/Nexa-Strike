@@ -80,6 +80,33 @@
   border: 0;
 }
 
+.utility-detail__zoom-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.utility-detail__zoom-item {
+  min-width: 0;
+  margin: 0;
+  padding: 0.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  background: #111216;
+}
+
+.utility-detail__zoom-item figcaption {
+  margin-bottom: 0.45rem;
+  color: #7dd3fc;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.utility-detail__zoom-item .utility-detail__image {
+  max-height: min(44vh, 420px);
+}
+
 .utility-detail__media-empty,
 .utility-detail__external-video,
 .utility-detail__media-notice {
