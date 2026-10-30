@@ -448,6 +448,29 @@ const MapDetail = () => {
     return metadata;
   };
 
+  const selectedLineGroup = selectedPoint?.utility_type === 'line'
+    ? getLineGroupForPoint(selectedPoint)
+    : null;
+  const selectedLineParentId = selectedPoint?.utility_type === 'line'
+    ? getParentIdFromDescription(selectedLineGroup || selectedPoint)
+    : null;
+  const selectedLineParent = selectedPoint?.utility_type === 'line'
+    ? points.find((point) => (
+      point.id === selectedLineParentId
+      && point.utility_type !== 'line'
+      && point.utility_type !== 'line_group'
+    )) || (selectedLineGroup ? null : getNearestParentForLine(selectedPoint))
+    : null;
+  const selectedLineContextPoints = selectedLineParent
+    ? [
+      selectedLineParent,
+      ...getRelatedLines(selectedLineParent),
+      ...getRelatedGroups(selectedLineParent).flatMap((group) => [group, ...getGroupChildren(group)]),
+    ]
+    : selectedPoint?.utility_type === 'line'
+      ? [selectedPoint, ...(selectedLineGroup ? [selectedLineGroup, ...getGroupChildren(selectedLineGroup)] : [])]
+      : [];
+
   // Exclude 'line' points from normal filters — they are shown only when related to a selected parent
   const filteredPoints = points.filter((point) => {
     if (point.utility_type === 'line' || point.utility_type === 'line_group') return false;
@@ -497,10 +520,20 @@ const MapDetail = () => {
     }
   }
 
+  if (selectedPoint?.utility_type === 'line') {
+    selectedLineContextPoints.forEach((point) => {
+      if (!visiblePoints.find((visiblePoint) => visiblePoint.id === point.id)) {
+        visiblePoints.push(point);
+      }
+    });
+  }
+
   const selectedGroup = selectedPoint?.utility_type === 'line_group'
     ? selectedPoint
     : selectedPoint && getLineGroupForPoint(selectedPoint);
-  const mapVisiblePoints = selectedGroup
+  const mapVisiblePoints = selectedPoint?.utility_type === 'line'
+    ? visiblePoints.filter((point) => selectedLineContextPoints.some((contextPoint) => contextPoint.id === point.id))
+    : selectedGroup
     ? visiblePoints.filter((point) => point.id === selectedGroup.id || getLineGroupForPoint(point)?.id === selectedGroup.id)
     : selectedPoint && selectedPoint.utility_type !== 'line'
       ? visiblePoints.filter((point) => point.id === selectedPoint.id || point.utility_type === 'line' || point.utility_type === 'line_group')
@@ -511,6 +544,11 @@ const MapDetail = () => {
       const parent = points.find((point) => point.id === getParentIdFromDescription(selectedPoint));
       return parent ? [{ point: selectedPoint, parent }] : [];
     })()
+    : selectedPoint?.utility_type === 'line' && selectedLineParent
+      ? [
+        ...getRelatedLines(selectedLineParent).map((point) => ({ point, parent: selectedLineParent })),
+        ...getRelatedGroups(selectedLineParent).map((point) => ({ point, parent: selectedLineParent })),
+      ]
     : selectedPoint && selectedPoint.utility_type !== 'line'
       ? [
         ...getRelatedLines(selectedPoint).map((point) => ({ point, parent: selectedPoint })),
