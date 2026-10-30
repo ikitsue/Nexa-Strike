@@ -1,7 +1,7 @@
 {
   "name": "nexastrike",
-  "version": "1.3.350",
-  "description": "**Version**: 1.3.350  \r **Statut**: 🟢 Production Ready  \r **Date**: May 28, 2026",
+  "version": "1.4.1",
+  "description": "**Version**: 1.4.1  \r **Statut**: 🟢 Production Ready  \r **Date**: May 28, 2026",
   "main": "add-remaining-maps.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
