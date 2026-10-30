@@ -531,8 +531,8 @@
 .detail-image,
 .detail-video {
   width: 100%;
-  max-height: 280px;
-  object-fit: cover;
+  max-height: min(62vh, 590px);
+  object-fit: contain;
   border-radius: 12px;
   margin-top: 0.75rem;
 }
@@ -565,8 +565,76 @@
 }
 
 .detail-video-embed {
+  display: block;
+  height: auto;
   border: 0;
   aspect-ratio: 16 / 9;
+}
+
+.map-detail-youtube-intro {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 220px;
+  height: auto;
+  max-height: min(62vh, 590px);
+  aspect-ratio: 16 / 9;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  overflow: hidden;
+  margin-top: 0.75rem;
+  padding: 2rem;
+  border-radius: 12px;
+  background: #111216;
+  color: #e2e8f0;
+  text-align: center;
+}
+
+.map-detail-youtube-intro strong {
+  color: #7dd3fc;
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+}
+
+.map-detail-youtube-intro p {
+  max-width: 38rem;
+  margin: 0;
+}
+
+.map-detail-youtube-intro-skip {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0.9rem;
+  z-index: 1;
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid rgba(125, 211, 252, 0.7);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #e2e8f0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.map-detail-youtube-intro-skip:hover {
+  border-color: #7dd3fc;
+  color: #7dd3fc;
+}
+
+.map-detail-youtube-intro-progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: #00c8ff;
+  transform-origin: left;
+  animation: map-detail-youtube-intro-progress 15s linear forwards;
+}
+
+@keyframes map-detail-youtube-intro-progress {
+  to { transform: scaleX(0); }
 }
 
 .line-zoom-image-tabs {

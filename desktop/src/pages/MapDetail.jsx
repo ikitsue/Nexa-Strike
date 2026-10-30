@@ -106,6 +106,7 @@ const MapDetail = () => {
   const [map, setMap] = useState(null);
   const [points, setPoints] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
+  const [youtubeIntroCompletedKey, setYoutubeIntroCompletedKey] = useState(null);
   const [lineImageView, setLineImageView] = useState('zoom_in');
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(() => getMapDetailPreferences(id).filters);
@@ -180,6 +181,20 @@ const MapDetail = () => {
   useEffect(() => {
     setLineImageView('zoom_in');
   }, [selectedPoint?.id]);
+
+  const selectedYoutubeEmbedUrl = getYouTubeEmbedUrl(selectedPoint?.video_url);
+  const youtubeIntroKey = selectedYoutubeEmbedUrl && selectedPoint
+    ? `${id}:${selectedPoint.id}:${selectedYoutubeEmbedUrl}`
+    : null;
+
+  useEffect(() => {
+    setYoutubeIntroCompletedKey(null);
+    if (!youtubeIntroKey || !preferences.externalMedia) return undefined;
+    const timeoutId = window.setTimeout(() => {
+      setYoutubeIntroCompletedKey(youtubeIntroKey);
+    }, 15000);
+    return () => window.clearTimeout(timeoutId);
+  }, [youtubeIntroKey, preferences.externalMedia]);
 
   const orderMaps = (mapsList) => {
     const mapPool = ['ancient', 'anubis', 'dust ii', 'inferno', 'cache', 'nuke', 'mirage'];
@@ -617,6 +632,11 @@ const MapDetail = () => {
   }, {});
 
   const youtubeEmbedUrl = getYouTubeEmbedUrl(activePoint?.video_url);
+  const showYoutubeIntro = Boolean(
+    youtubeIntroKey
+    && preferences.externalMedia
+    && youtubeIntroCompletedKey !== youtubeIntroKey,
+  );
 
   return (
     <div className="map-detail">
@@ -939,15 +959,29 @@ const MapDetail = () => {
 
                 {youtubeEmbedUrl ? (
                   preferences.externalMedia ? (
-                    <iframe
-                      src={`${youtubeEmbedUrl}?vq=hd1080`}
-                      title={`${activePoint.name} — YouTube`}
-                      className="detail-video detail-video-embed"
-                      loading="lazy"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                      allow="encrypted-media; picture-in-picture; fullscreen"
-                      allowFullScreen
-                    />
+                    showYoutubeIntro ? (
+                      <div className="map-detail-youtube-intro" role="status">
+                        <strong>{t('youtubeHdIntroTitle')}</strong>
+                        <p>{t('youtubeHdIntroMessage')}</p>
+                        <span className="map-detail-youtube-intro-progress" aria-hidden="true" />
+                        <button
+                          type="button"
+                          className="map-detail-youtube-intro-skip"
+                          onClick={() => setYoutubeIntroCompletedKey(youtubeIntroKey)}
+                        >
+                          {t('youtubeHdIntroSkip')}
+                        </button>
+                      </div>
+                    ) : (
+                      <iframe
+                        src={`${youtubeEmbedUrl}?vq=hd1080`}
+                        title={`${activePoint.name} — YouTube`}
+                        className="detail-video detail-video-embed"
+                        loading="lazy"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allow="encrypted-media; picture-in-picture; fullscreen"
+                      />
+                    )
                   ) : (
                     <div className="external-media-notice" role="note">
                       <p>

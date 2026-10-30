@@ -102,6 +102,7 @@ const UtilityDetail = () => {
     () => localStorage.getItem(`nexastrike-utility-bookmark-${mapId}-${pointId}`) === 'true',
   );
   const [actionMessage, setActionMessage] = useState('');
+  const [youtubeIntroCompletedKey, setYoutubeIntroCompletedKey] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -147,6 +148,19 @@ const UtilityDetail = () => {
     [map],
   );
 
+  const videoUrl = point?.video_url || (videoExtensions.test(point?.image_url || '') ? point.image_url : null);
+  const imageUrl = point?.image_url && !videoExtensions.test(point.image_url) ? point.image_url : null;
+  const youtubeEmbedUrl = videoUrl && /^https?:\/\//i.test(videoUrl) ? getYouTubeEmbedUrl(videoUrl) : null;
+  const youtubeIntroKey = youtubeEmbedUrl ? `${mapId}:${pointId}:${youtubeEmbedUrl}` : null;
+
+  useEffect(() => {
+    if (!youtubeIntroKey || !preferences.externalMedia) return undefined;
+    const timeoutId = window.setTimeout(() => {
+      setYoutubeIntroCompletedKey(youtubeIntroKey);
+    }, 15000);
+    return () => window.clearTimeout(timeoutId);
+  }, [youtubeIntroKey, preferences.externalMedia]);
+
   if (loading) {
     return <main className="utility-detail"><p className="utility-detail__message">{t('loadingUtilityDetail')}</p></main>;
   }
@@ -164,9 +178,11 @@ const UtilityDetail = () => {
   const teamLabel = ['ct', 't'].includes(String(point.team || '').toLowerCase())
     ? String(point.team).toUpperCase()
     : t('allTeams');
-  const videoUrl = point.video_url || (videoExtensions.test(point.image_url || '') ? point.image_url : null);
-  const imageUrl = point.image_url && !videoExtensions.test(point.image_url) ? point.image_url : null;
-  const youtubeEmbedUrl = videoUrl && /^https?:\/\//i.test(videoUrl) ? getYouTubeEmbedUrl(videoUrl) : null;
+  const showYoutubeIntro = Boolean(
+    youtubeIntroKey
+    && preferences.externalMedia
+    && youtubeIntroCompletedKey !== youtubeIntroKey,
+  );
   const values = [
     { key: 'mouse_button', label: t('mouseButton') },
     { key: 'air_time', label: t('airTime') },
@@ -251,14 +267,29 @@ const UtilityDetail = () => {
           <section className="utility-detail__media" aria-label={point.name || t('unknown')}>
             {youtubeEmbedUrl ? (
               preferences.externalMedia ? (
-                <iframe
-                  src={`${youtubeEmbedUrl}?vq=hd1080`}
-                  title={`${point.name} — YouTube`}
-                  className="utility-detail__video utility-detail__video--embed"
-                  loading="lazy"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allow="encrypted-media; picture-in-picture; fullscreen"
-                />
+                showYoutubeIntro ? (
+                  <div className="utility-detail__youtube-intro" role="status">
+                    <strong>{t('youtubeHdIntroTitle')}</strong>
+                    <p>{t('youtubeHdIntroMessage')}</p>
+                    <span className="utility-detail__youtube-intro-progress" aria-hidden="true" />
+                    <button
+                      type="button"
+                      className="utility-detail__youtube-intro-skip"
+                      onClick={() => setYoutubeIntroCompletedKey(youtubeIntroKey)}
+                    >
+                      {t('youtubeHdIntroSkip')}
+                    </button>
+                  </div>
+                ) : (
+                  <iframe
+                    src={`${youtubeEmbedUrl}?vq=hd1080`}
+                    title={`${point.name} — YouTube`}
+                    className="utility-detail__video utility-detail__video--embed"
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allow="encrypted-media; picture-in-picture; fullscreen"
+                  />
+                )
               ) : (
                 <div className="utility-detail__media-notice" role="note">
                   <p>{t('externalMediaVideoPrivacyNotice')}</p>
