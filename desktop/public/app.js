@@ -1,4 +1,4 @@
-// CS2 Utility Desktop App Entry Point
+// NexaStrike Desktop App Entry Point
 // Uses React 18 from CDN with Babel Standalone for JSX compilation
 
 const { useState, useEffect } = React;
@@ -33,7 +33,7 @@ function App() {
   }
 
   return React.createElement('div', { style: { padding: '20px' } },
-    React.createElement('h1', null, 'CS2 Utility Desktop'),
+    React.createElement('h1', null, 'NexaStrike Desktop'),
     React.createElement('p', null, 'App is running with Electron ', electron?.version || 'unknown')
   );
 }
