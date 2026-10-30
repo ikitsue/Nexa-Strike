@@ -12,6 +12,7 @@ yarn-error.log*
 # Build outputs
 build/
 dist/
+dist-test/
 out/
 
 # Electron dist
