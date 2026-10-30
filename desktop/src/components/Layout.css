@@ -95,6 +95,17 @@
   border-color: rgba(255, 106, 106, 0.32);
 }
 
+.update-button-unavailable {
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--border);
+}
+
+.update-button-unavailable:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--ghost);
+}
+
 .window-controls {
   gap: 0.25rem;
 }

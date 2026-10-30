@@ -10,6 +10,14 @@ let localServerUrl;
 let updateStatus = { status: 'idle' };
 
 const isMainWindowSender = (event) => mainWindow && event.sender === mainWindow.webContents;
+const isUpdateReleaseUnavailable = (error) => [
+  'ERR_UPDATER_NO_PUBLISHED_VERSIONS',
+  'ERR_UPDATER_LATEST_VERSION_NOT_FOUND',
+  'ERR_UPDATER_CHANNEL_FILE_NOT_FOUND',
+].includes(error?.code);
+const setUpdateError = (error) => {
+  setUpdateStatus({ status: isUpdateReleaseUnavailable(error) ? 'unavailable' : 'error' });
+};
 
 const setUpdateStatus = (status) => {
   updateStatus = status;
@@ -26,7 +34,7 @@ const checkForUpdates = async () => {
     await autoUpdater.checkForUpdates();
   } catch (error) {
     console.error('Failed to check for NexaStrike updates:', error);
-    setUpdateStatus({ status: 'error' });
+    setUpdateError(error);
   }
 };
 
@@ -41,7 +49,7 @@ autoUpdater.on('download-progress', (progress) => (
 autoUpdater.on('update-downloaded', (info) => setUpdateStatus({ status: 'downloaded', version: info.version }));
 autoUpdater.on('error', (error) => {
   console.error('NexaStrike updater error:', error);
-  setUpdateStatus({ status: 'error' });
+  setUpdateError(error);
 });
 
 ipcMain.on('window:minimize', (event) => {

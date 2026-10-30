@@ -158,6 +158,15 @@ const Layout = () => {
                 {t('retryUpdateCheck')}
               </button>
             )}
+            {updates && updateStatus.status === 'unavailable' && (
+              <button
+                className="update-button update-button-unavailable"
+                onClick={updates.check}
+                title={t('retryUpdateCheck')}
+              >
+                {t('desktopUpdatesUnavailable')}
+              </button>
+            )}
             <button
               className={`hamburger ${menuOpen ? 'active' : ''}`}
               onClick={() => setMenuOpen(!menuOpen)}
