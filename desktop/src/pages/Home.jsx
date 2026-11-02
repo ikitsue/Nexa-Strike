@@ -8,10 +8,7 @@ const Home = () => {
   const [tutorialStep, setTutorialStep] = useState(0);
   const tutorialSteps = [1, 2, 3, 4, 5];
   const currentTutorialStep = tutorialSteps[tutorialStep];
-  const tutorialVideoName = currentTutorialStep === 5
-    ? 'step -5.mp4'
-    : `step-${currentTutorialStep}.mp4`;
-  const tutorialVideo = `${import.meta.env.BASE_URL}videos/tutorial/${encodeURIComponent(tutorialVideoName)}`;
+  const tutorialVideo = `${import.meta.env.BASE_URL}videos/tutorial/step-${currentTutorialStep}.mp4`;
 
   return (
     <div className="home">

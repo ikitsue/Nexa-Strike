@@ -8,7 +8,7 @@ const Home = () => {
   const [tutorialStep, setTutorialStep] = useState(0);
   const tutorialSteps = [1, 2, 3, 4, 5];
   const currentTutorialStep = tutorialSteps[tutorialStep];
-  const tutorialVideo = `/videos/tutorial/${currentTutorialStep === 5 ? 'step%20-5' : `step-${currentTutorialStep}`}.mp4`;
+  const tutorialVideo = `/videos/tutorial/step-${currentTutorialStep}.mp4`;
 
   const goToNextTutorialStep = () => {
     setTutorialStep((currentStep) => (
