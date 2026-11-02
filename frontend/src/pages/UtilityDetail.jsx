@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { getFileUrl, getFileUrlFallbacks, mapsAPI } from '../api/supabaseApi';
 import { useCookieConsent } from '../../../shared/consent/CookieConsent';
 import { useLanguage } from '../i18n';
+import ImageLightbox from '../components/ImageLightbox';
 import './UtilityDetail.css';
 
 const videoExtensions = /\.(mp4|webm|mov|avi|mkv)$/i;
@@ -236,14 +237,17 @@ const UtilityDetail = () => {
   };
 
   const renderImage = (url, alt = point.name || '') => (
-    <img
+    <ImageLightbox
       className="utility-detail__image"
       src={getFileUrl(url)}
+      fallbackSrc={getFileUrlFallbacks(url)[1]}
       alt={alt}
-      onError={(event) => {
-        const fallback = getFileUrlFallbacks(url)[1];
-        if (fallback && event.currentTarget.src !== fallback) event.currentTarget.src = fallback;
-      }}
+      openLabel={t('viewImage')}
+      closeLabel={t('close')}
+      zoomInLabel={t('zoomIn')}
+      zoomOutLabel={t('zoomOut')}
+      resetZoomLabel={t('resetImageZoom')}
+      zoomControlsLabel={t('imageZoomControls')}
     />
   );
   const lineZoomImages = point.utility_type === 'line'

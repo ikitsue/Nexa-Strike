@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { mapsAPI, getFileUrl, getFileUrlFallbacks } from '../api/supabaseApi';
 import { useAuthStore } from '../store/authStore';
 import { useLanguage } from '../i18n';
+import ImageLightbox from '../components/ImageLightbox';
 import { useCookieConsent } from '../../../shared/consent/CookieConsent';
 import './MapDetail.css';
 
@@ -966,15 +967,17 @@ const MapDetail = () => {
                       <span className="line-zoom-image-label">
                         {t(activeLineImage.key === 'zoom_in' ? 'lineZoomInImage' : 'lineZoomOutImage')}
                       </span>
-                      <img
+                      <ImageLightbox
                         src={getFileUrl(activeLineImage.url)}
+                        fallbackSrc={getFileUrlFallbacks(activeLineImage.url)[1]}
                         alt={`${activePoint.name} - ${t(activeLineImage.key === 'zoom_in' ? 'lineZoomInImage' : 'lineZoomOutImage')}`}
                         className="detail-image line-zoom-image"
-                        onError={(event) => {
-                          const fallbacks = getFileUrlFallbacks(activeLineImage.url);
-                          const next = fallbacks[1];
-                          if (next && event.currentTarget.src !== next) event.currentTarget.src = next;
-                        }}
+                        openLabel={t('viewImage')}
+                        closeLabel={t('close')}
+                        zoomInLabel={t('zoomIn')}
+                        zoomOutLabel={t('zoomOut')}
+                        resetZoomLabel={t('resetImageZoom')}
+                        zoomControlsLabel={t('imageZoomControls')}
                       />
                     </div>
                   </div>
@@ -983,17 +986,17 @@ const MapDetail = () => {
                 {activePoint.image_url
                   && (activePoint.utility_type !== 'line' || lineZoomImages.length === 0)
                   && !activePoint.image_url.match(/\.(mp4|webm|mov|avi|mkv)$/i) && (
-                  <img
+                  <ImageLightbox
                     src={getFileUrl(activePoint.image_url)}
+                    fallbackSrc={getFileUrlFallbacks(activePoint.image_url)[1]}
                     alt={activePoint.name}
                     className="detail-image"
-                    onError={(e) => {
-                      const fallbacks = getFileUrlFallbacks(activePoint.image_url);
-                      const next = fallbacks[1];
-                      if (next && e.target.src !== next) {
-                        e.target.src = next;
-                      }
-                    }}
+                    openLabel={t('viewImage')}
+                    closeLabel={t('close')}
+                    zoomInLabel={t('zoomIn')}
+                    zoomOutLabel={t('zoomOut')}
+                    resetZoomLabel={t('resetImageZoom')}
+                    zoomControlsLabel={t('imageZoomControls')}
                   />
                 )}
 

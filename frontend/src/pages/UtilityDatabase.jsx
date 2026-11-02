@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getFileUrl, mapsAPI, utilityPointsAPI } from '../api/supabaseApi';
+import { getFileUrl, getFileUrlFallbacks, mapsAPI, utilityPointsAPI } from '../api/supabaseApi';
 import { useLanguage } from '../i18n';
+import ImageLightbox from '../components/ImageLightbox';
 import './UtilityDatabase.css';
 
 const utilityTypes = ['smoke', 'molotov', 'flash', 'grenade'];
@@ -457,7 +458,19 @@ const UtilityDatabase = () => {
                       </div>
                     ) : point.image_url ? (
                       <div className="utility-database__media-actions">
-                        <img className="utility-database__media" src={getFileUrl(point.image_url)} alt={point.name || ''} loading="lazy" />
+                        <ImageLightbox
+                          className="utility-database__media"
+                          src={getFileUrl(point.image_url)}
+                          fallbackSrc={getFileUrlFallbacks(point.image_url)[1]}
+                          alt={point.name || ''}
+                          loading="lazy"
+                          openLabel={t('viewImage')}
+                          closeLabel={t('close')}
+                          zoomInLabel={t('zoomIn')}
+                          zoomOutLabel={t('zoomOut')}
+                          resetZoomLabel={t('resetImageZoom')}
+                          zoomControlsLabel={t('imageZoomControls')}
+                        />
                         <Link className="utility-database__open-page" to={`/db/${point.map_id}/${point.id}`}>
                           {t('openPage')}
                         </Link>

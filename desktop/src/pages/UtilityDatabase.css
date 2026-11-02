@@ -310,8 +310,8 @@
 
 .utility-database__media {
   display: block;
-  width: min(100%, 340px);
-  max-height: 230px;
+  width: 100%;
+  max-height: 320px;
   margin-top: 0.75rem;
   border-radius: 9px;
   object-fit: contain;
