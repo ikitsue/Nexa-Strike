@@ -29,6 +29,7 @@ const Home = () => {
         style={{ '--hero-image': `url("${import.meta.env.BASE_URL}images/ancient.jpg")` }}
       >
         <div className="hero-content">
+          <p className="hero-kicker">NEXASTRIKE <span aria-hidden="true">/</span> CS2</p>
           <h1 className="hero-title">{t('appTitle')}</h1>
           <p className="hero-subtitle">{t('footerBrandDescription')}</p>
           <p className="hero-description">
@@ -37,6 +38,16 @@ const Home = () => {
           <Link to="/maps" className="btn-primary">
             🗺️ {t('maps')}
           </Link>
+        </div>
+        <div className="hero-art" aria-hidden="true">
+          <div className="hero-art__frame">
+            <img className="hero-art__map" src={`${import.meta.env.BASE_URL}images/mirage.jpg`} alt="" />
+            <div className="hero-art__wash" />
+            <div className="hero-art__logo">
+              <img src={`${import.meta.env.BASE_URL}nexastrike-icon.png`} alt="" />
+            </div>
+            <span className="hero-art__label">CS2 <span>/</span> NEXASTRIKE</span>
+          </div>
         </div>
       </section>
 

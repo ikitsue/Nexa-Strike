@@ -241,12 +241,14 @@ const ContactUs = () => {
                 </a>
               </p>
               <div className="form-group">
-                <HCaptcha
-                  ref={captchaRef}
-                  sitekey="f0d01e14-76a0-4cee-be80-171ae994962c"
-                  onVerify={setCaptchaToken}
-                  onExpire={() => setCaptchaToken('')}
-                />
+                <div className="captcha-widget">
+                  <HCaptcha
+                    ref={captchaRef}
+                    sitekey="f0d01e14-76a0-4cee-be80-171ae994962c"
+                    onVerify={setCaptchaToken}
+                    onExpire={() => setCaptchaToken('')}
+                  />
+                </div>
               </div>
 
               <button type="submit" className="submit-btn" disabled={isSubmitting}>

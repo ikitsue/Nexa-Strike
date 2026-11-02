@@ -23,7 +23,7 @@ const Footer = () => {
         {/* Section 1: Brand & Description */}
         <div className="footer-section">
           <div className="footer-brand">
-            <h3>🎮 NexaStrike</h3>
+            <h3><img src="/nexastrike-icon.png" alt="" /> NexaStrike</h3>
             <p>{t('footerBrandDescription')}</p>
           </div>
         </div>

@@ -91,11 +91,13 @@ const Login = () => {
           </a>
         </p>
         <div className="form-group">
-          <HCaptcha
-            ref={captchaRef}
-            sitekey="f0d01e14-76a0-4cee-be80-171ae994962c"
-            onVerify={handleCaptchaChange}
-          />
+          <div className="captcha-widget">
+            <HCaptcha
+              ref={captchaRef}
+              sitekey="f0d01e14-76a0-4cee-be80-171ae994962c"
+              onVerify={handleCaptchaChange}
+            />
+          </div>
         </div>
 
         <button type="submit" className="btn-submit">{t('login')}</button>

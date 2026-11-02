@@ -5,6 +5,8 @@ import App from './App';
 import { LanguageProvider } from './i18n';
 import './index.css';
 import '../../shared/light-theme.css';
+import '../../frontend/src/visual-identity.css';
+import './visual-identity.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

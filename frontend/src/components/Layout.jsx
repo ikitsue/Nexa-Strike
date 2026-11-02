@@ -66,6 +66,12 @@ const Layout = () => {
             NexaStrike
           </Link>
 
+          <div className="nav-links">
+            <Link to="/maps">{t('maps')}</Link>
+            <Link to="/db">{t('utilityDatabase')}</Link>
+            <Link to="/suggestions">{t('suggestions')}</Link>
+          </div>
+
           <button
             className={`hamburger ${menuOpen ? 'active' : ''}`}
             onClick={() => setMenuOpen(!menuOpen)}

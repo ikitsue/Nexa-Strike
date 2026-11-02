@@ -27,8 +27,12 @@ const Home = () => {
       </aside>
 
       {/* Hero Section */}
-      <section className="hero-section">
+      <section
+        className="hero-section"
+        style={{ '--hero-image': 'url("/images/ancient.jpg")' }}
+      >
         <div className="hero-content">
+          <p className="hero-kicker">NEXASTRIKE <span aria-hidden="true">/</span> CS2</p>
           <h1 className="hero-title">{t('appTitle')}</h1>
           <p className="hero-subtitle">{t('footerBrandDescription')}</p>
           <p className="hero-description">
@@ -37,6 +41,16 @@ const Home = () => {
           <Link to="/maps" className="btn-primary">
             🗺️ {t('maps')}
           </Link>
+        </div>
+        <div className="hero-art" aria-hidden="true">
+          <div className="hero-art__frame">
+            <img className="hero-art__map" src="/images/mirage.jpg" alt="" />
+            <div className="hero-art__wash" />
+            <div className="hero-art__logo">
+              <img src="/nexastrike-icon.png" alt="" />
+            </div>
+            <span className="hero-art__label">CS2 <span>/</span> NEXASTRIKE</span>
+          </div>
         </div>
       </section>
 
