@@ -80,6 +80,15 @@ const getParentIdFromPoint = (point) => {
   return match?.[1] || null;
 };
 
+const getConsoleCommand = (description = '') => String(description)
+  .split('|')
+  .map((part) => part.trim())
+  .find((part) => /^console_command\s*:/i.test(part))
+  ?.split(':')
+  .slice(1)
+  .join(':')
+  .trim() || '';
+
 const getLineCategory = (point, pointsById) => {
   let parent = pointsById.get(`${point.map_id}:${getParentIdFromPoint(point)}`);
   const visited = new Set();
@@ -219,6 +228,7 @@ const UtilityDatabase = () => {
     const matchesSearch = [
       point.name,
       point.description,
+      getConsoleCommand(point.description),
       point.suggested_by,
       mapNames.get(String(point.map_id)),
       t(category),

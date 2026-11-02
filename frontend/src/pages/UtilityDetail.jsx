@@ -222,6 +222,19 @@ const UtilityDetail = () => {
     }
   };
 
+  const copyConsoleCommand = async () => {
+    try {
+      if (typeof navigator.clipboard?.writeText !== 'function') {
+        throw new Error('Clipboard API is not available');
+      }
+      await navigator.clipboard.writeText(parsed.metadata.console_command);
+      setActionMessage(t('consoleCommandCopied'));
+    } catch (error) {
+      console.error('Failed to copy console command:', error);
+      setActionMessage(t('consoleCommandCopyError'));
+    }
+  };
+
   const renderImage = (url, alt = point.name || '') => (
     <img
       className="utility-detail__image"
@@ -350,9 +363,30 @@ const UtilityDetail = () => {
 
           <div className="utility-detail__metadata">
             {values.map(({ key, label }) => (
-              <div className="utility-detail__metadata-item" key={key}>
+              <div
+                className={`utility-detail__metadata-item${key === 'console_command' ? ' utility-detail__metadata-item--command' : ''}`}
+                key={key}
+              >
                 <span>{label}</span>
-                <strong>{key === 'console_command' ? parsed.metadata[key] : translateMetadataValue(parsed.metadata[key], t)}</strong>
+                {key === 'console_command' ? (
+                  <div className="utility-detail__command-row">
+                    <code>{parsed.metadata[key]}</code>
+                    <button
+                      type="button"
+                      className="utility-detail__copy-command"
+                      onClick={copyConsoleCommand}
+                      aria-label={t('copyCommand')}
+                      title={t('copyCommand')}
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="8" y="8" width="12" height="12" rx="2" />
+                        <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <strong>{translateMetadataValue(parsed.metadata[key], t)}</strong>
+                )}
               </div>
             ))}
           </div>

@@ -107,6 +107,7 @@ const UtilityManager = () => {
     x: 0,
     y: 0,
     description: '',
+    console_command: '',
     suggested_by: '',
     jump_throw: 'no',
     movement: 'standing',
@@ -134,6 +135,7 @@ const UtilityManager = () => {
       movement: 'standing',
       mouse_button: 'left_click',
       difficulty: 'medium',
+      console_command: '',
       parent_id: null,
     };
 
@@ -148,6 +150,7 @@ const UtilityManager = () => {
       else if (key === 'movement') metadata.movement = value || 'standing';
       else if (key === 'mouse_button') metadata.mouse_button = value || 'left_click';
       else if (key === 'difficulty') metadata.difficulty = value || 'medium';
+      else if (key === 'console_command') metadata.console_command = value;
       else if (key === 'parent') metadata.parent_id = value ? Number(value) : null;
       else otherParts.push(part);
     });
@@ -560,6 +563,9 @@ const UtilityManager = () => {
       parts.push(`movement:${pointForm.movement}`);
       parts.push(`mouse_button:${pointForm.mouse_button}`);
       parts.push(`difficulty:${pointForm.difficulty}`);
+      if (pointForm.console_command.trim()) {
+        parts.push(`console_command:${pointForm.console_command.trim()}`);
+      }
     }
     return parts.join(' | ');
   };
@@ -641,6 +647,7 @@ const UtilityManager = () => {
       movement: metadata.movement || 'standing',
       mouse_button: metadata.mouse_button || 'left_click',
       difficulty: metadata.difficulty || 'medium',
+      console_command: metadata.console_command || '',
       parent_id: metadata.parent_id || null,
       team: point.team || 't',
       file: null,
@@ -964,6 +971,18 @@ const UtilityManager = () => {
                               <option value="medium">{t('difficultyMedium')}</option>
                               <option value="hard">{t('difficultyHard')}</option>
                             </select>
+                          </div>
+
+                          <div className="form-group">
+                            <label htmlFor="lineConsoleCommand">{t('consoleCommand')}</label>
+                            <input
+                              id="lineConsoleCommand"
+                              type="text"
+                              name="console_command"
+                              value={pointForm.console_command}
+                              onChange={handleFormChange}
+                              placeholder={t('consoleCommandPlaceholder')}
+                            />
                           </div>
                         </>
                       )}

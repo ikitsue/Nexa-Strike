@@ -106,6 +106,7 @@ const MapDetail = () => {
   const [map, setMap] = useState(null);
   const [points, setPoints] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
+  const [consoleCommandMessage, setConsoleCommandMessage] = useState('');
   const [youtubeIntroCompletedKey, setYoutubeIntroCompletedKey] = useState(null);
   const [lineImageView, setLineImageView] = useState('zoom_in');
   const [loading, setLoading] = useState(true);
@@ -180,7 +181,21 @@ const MapDetail = () => {
 
   useEffect(() => {
     setLineImageView('zoom_in');
+    setConsoleCommandMessage('');
   }, [selectedPoint?.id]);
+
+  const copyConsoleCommand = async (command) => {
+    try {
+      if (typeof navigator.clipboard?.writeText !== 'function') {
+        throw new Error('Clipboard API is not available');
+      }
+      await navigator.clipboard.writeText(command);
+      setConsoleCommandMessage(t('consoleCommandCopied'));
+    } catch (error) {
+      console.error('Failed to copy console command:', error);
+      setConsoleCommandMessage(t('consoleCommandCopyError'));
+    }
+  };
 
   const selectedYoutubeEmbedUrl = getYouTubeEmbedUrl(selectedPoint?.video_url);
   const youtubeIntroKey = selectedYoutubeEmbedUrl && selectedPoint
@@ -439,6 +454,7 @@ const MapDetail = () => {
       mouse_button: null,
       difficulty: null,
       air_time: null,
+      console_command: null,
     };
 
     const remaining = [];
@@ -453,6 +469,7 @@ const MapDetail = () => {
       else if (key === 'mouse_button') metadata.mouse_button = value;
       else if (key === 'difficulty') metadata.difficulty = value;
       else if (key === 'air_time') metadata.air_time = value;
+      else if (key === 'console_command') metadata.console_command = value;
       else if (key === 'parent') {
         // ignore parent metadata used for line associations
       } else {
@@ -878,6 +895,30 @@ const MapDetail = () => {
                       </p>
                     )}
                     <p>{parsePointMetadata(activePoint.description).description}</p>
+                    {activePoint.utility_type === 'line' && (() => {
+                      const command = parsePointMetadata(activePoint.description).console_command;
+                      return command && (
+                        <div className="point-console-command">
+                          <span>{t('consoleCommand')}</span>
+                          <div className="point-console-command-row">
+                            <code>{command}</code>
+                            <button
+                              type="button"
+                              className="point-console-command-copy"
+                              onClick={() => copyConsoleCommand(command)}
+                              aria-label={t('copyCommand')}
+                              title={t('copyCommand')}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="8" y="8" width="12" height="12" rx="2" />
+                                <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                              </svg>
+                            </button>
+                          </div>
+                          {consoleCommandMessage && <span className="point-console-command-message" role="status">{consoleCommandMessage}</span>}
+                        </div>
+                      );
+                    })()}
                   </div>
                   <span
                     className="point-badge"
