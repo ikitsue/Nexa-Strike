@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
 const { validateId } = require('../middleware/validation');
+const handleRouteError = require('../utils/routeError');
 
 // Get all maps
 router.get('/', async (req, res) => {
@@ -9,7 +10,7 @@ router.get('/', async (req, res) => {
     const result = await pool.query('SELECT * FROM maps ORDER BY name ASC');
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'List maps', err);
   }
 });
 
@@ -33,7 +34,7 @@ router.get('/:id', validateId, async (req, res) => {
       points: pointsResult.rows
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Get map', err);
   }
 });
 

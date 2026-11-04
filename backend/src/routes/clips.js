@@ -6,6 +6,7 @@ const authMiddleware = require('../middleware/auth');
 const { validateClip } = require('../middleware/validation');
 const { uploadLimiter } = require('../middleware/rateLimiter');
 const path = require('path');
+const handleRouteError = require('../utils/routeError');
 
 // Multer setup
 const storage = multer.diskStorage({
@@ -38,7 +39,7 @@ router.get('/', async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'List clips', err);
   }
 });
 
@@ -56,7 +57,7 @@ router.post('/', authMiddleware, uploadLimiter, upload.single('file'), validateC
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error('Clip upload error:', err);
+    console.error('Clip upload failed', { name: err?.name, code: err?.code });
     res.status(500).json({ error: 'Failed to upload clip' });
   }
 });

@@ -2,10 +2,17 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
 const authMiddleware = require('../middleware/auth');
-const { validateMapAndPointId, validateId } = require('../middleware/validation');
+const {
+  validateMapAndPointId,
+  validateId,
+  validateUtilityPoint,
+  handleValidationErrors,
+} = require('../middleware/validation');
 const { uploadLimiter } = require('../middleware/rateLimiter');
 const multer = require('multer');
 const path = require('path');
+const { param } = require('express-validator');
+const handleRouteError = require('../utils/routeError');
 
 // Multer setup for utility images/videos
 const utilityStorage = multer.diskStorage({
@@ -64,32 +71,42 @@ const adminMiddleware = async (req, res, next) => {
     }
     next();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Admin authorization', err);
   }
 };
 
 // Create utility point (admin only)
-router.post('/maps/:mapId/points', authMiddleware, adminMiddleware, uploadLimiter, utilityUpload.single('file'), validateUtilityPoint, handleValidationErrors, async (req, res) => {
-  try {
-    const { name, utility_type, x, y, description, team } = req.body;
-    const mapId = req.params.mapId;
-    const filePath = req.file ? `/uploads/utility/${req.file.filename}` : null;
-    
-    // Determine if it's image or video
-    const isVideo = req.file && /mp4|webm/.test(req.file.mimetype);
-    const imageUrl = !isVideo && filePath ? filePath : null;
-    const videoUrl = isVideo && filePath ? filePath : null;
+router.post(
+  '/maps/:mapId/points',
+  authMiddleware,
+  adminMiddleware,
+  param('mapId').isInt({ min: 1 }).withMessage('Invalid map ID'),
+  handleValidationErrors,
+  uploadLimiter,
+  utilityUpload.single('file'),
+  validateUtilityPoint,
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { name, utility_type, x, y, description, team } = req.body;
+      const mapId = req.params.mapId;
+      const filePath = req.file ? `/uploads/utility/${req.file.filename}` : null;
 
-    const result = await pool.query(
-      'INSERT INTO utility_points (map_id, name, utility_type, team, x, y, description, image_url, video_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-      [mapId, name, utility_type, team || 't', x, y, description, imageUrl, videoUrl]
-    );
+      const isVideo = req.file && /mp4|webm/.test(req.file.mimetype);
+      const imageUrl = !isVideo && filePath ? filePath : null;
+      const videoUrl = isVideo && filePath ? filePath : null;
 
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+      const result = await pool.query(
+        'INSERT INTO utility_points (map_id, name, utility_type, team, x, y, description, image_url, video_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+        [mapId, name, utility_type, team || 't', x, y, description, imageUrl, videoUrl]
+      );
+
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      handleRouteError(res, 'Create utility point', err);
+    }
   }
-});
+);
 
 // Update utility point (admin only)
 router.put('/maps/:mapId/points/:pointId', authMiddleware, adminMiddleware, uploadLimiter, utilityUpload.single('file'), validateMapAndPointId, validateUtilityPoint, handleValidationErrors, async (req, res) => {
@@ -133,7 +150,7 @@ router.put('/maps/:mapId/points/:pointId', authMiddleware, adminMiddleware, uplo
 
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Update utility point', err);
   }
 });
 
@@ -153,7 +170,7 @@ router.delete('/maps/:mapId/points/:pointId', authMiddleware, adminMiddleware, v
 
     res.json({ message: 'Utility point deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Delete utility point', err);
   }
 });
 
@@ -181,7 +198,7 @@ router.put('/maps/:id', authMiddleware, adminMiddleware, uploadLimiter, mapUploa
 
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Update map', err);
   }
 });
 

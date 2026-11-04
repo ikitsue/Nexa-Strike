@@ -1,13 +1,25 @@
 const { Resend } = require('resend');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const escapeHtml = (value = '') =>
+  String(value).replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  })[character]);
+const logEmailError = (context, error) => {
+  console.error(`${context} failed`, {
+    name: error?.name,
+    code: error?.code,
+  });
+};
 
 const emailService = {
   // Send welcome email after registration
   sendWelcomeEmail: async (email, username) => {
     try {
-      console.log(`📧 Attempting to send welcome email to ${email}`);
-      
       const response = await resend.emails.send({
         from: process.env.SENDER_EMAIL || 'onboarding@resend.dev',
         to: email,
@@ -69,7 +81,7 @@ const emailService = {
                 </div>
                 
                 <div class="content">
-                  <p>Hi <strong>${username}</strong>,</p>
+                  <p>Hi <strong>${escapeHtml(username)}</strong>,</p>
                   
                   <p>Thank you for registering with NexaStrike! We're excited to have you on board.</p>
                   
@@ -97,10 +109,9 @@ const emailService = {
         `,
       });
 
-      console.log('Welcome email sent to:', email);
       return response;
     } catch (error) {
-      console.error('Error sending welcome email:', error);
+      logEmailError('Welcome email', error);
       // Don't throw error - registration should still succeed even if email fails
       return null;
     }
@@ -167,13 +178,13 @@ const emailService = {
                 </div>
                 
                 <div class="content">
-                  <p>Hi <strong>${username}</strong>,</p>
+                  <p>Hi <strong>${escapeHtml(username)}</strong>,</p>
                   
                   <p>We regret to inform you that your NexaStrike account has been suspended due to a violation of our community guidelines.</p>
                   
                   <div class="warning-box">
                     <strong>Reason for suspension:</strong><br>
-                    ${banReason || 'Violation of community guidelines'}
+                    ${escapeHtml(banReason || 'Violation of community guidelines')}
                   </div>
                   
                   <p>This means you will no longer be able to:</p>
@@ -197,10 +208,9 @@ const emailService = {
         `,
       });
 
-      console.log('Ban notification email sent to:', email);
       return response;
     } catch (error) {
-      console.error('Error sending ban notification email:', error);
+      logEmailError('Ban notification email', error);
       return null;
     }
   },

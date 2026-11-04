@@ -4,6 +4,7 @@ const { body } = require('express-validator');
 const pool = require('../config/database');
 const authMiddleware = require('../middleware/auth');
 const { validateSuggestion, validateId, handleValidationErrors } = require('../middleware/validation');
+const handleRouteError = require('../utils/routeError');
 
 // Get all suggestions
 router.get('/', async (req, res) => {
@@ -13,8 +14,7 @@ router.get('/', async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error('Error fetching suggestions:', err);
-    res.status(500).json({ error: 'Failed to fetch suggestions' });
+    handleRouteError(res, 'List suggestions', err);
   }
 });
 
@@ -32,8 +32,7 @@ router.get('/:id', validateId, async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (err) {
-    console.error('Error fetching suggestion:', err);
-    res.status(500).json({ error: 'Failed to fetch suggestion' });
+    handleRouteError(res, 'Get suggestion', err);
   }
 });
 
@@ -58,8 +57,7 @@ router.post('/', authMiddleware, validateSuggestion, body('map_id').optional({ n
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error('Error creating suggestion:', err);
-    res.status(500).json({ error: 'Failed to create suggestion' });
+    handleRouteError(res, 'Create suggestion', err);
   }
 });
 
@@ -93,8 +91,7 @@ router.patch('/:id', authMiddleware, validateId,
 
       res.json(result.rows[0]);
     } catch (err) {
-      console.error('Error updating suggestion:', err);
-      res.status(500).json({ error: 'Failed to update suggestion' });
+      handleRouteError(res, 'Update suggestion', err);
     }
   }
 );
@@ -135,8 +132,7 @@ router.delete('/:id', authMiddleware, validateId, async (req, res) => {
 
     res.json({ message: 'Suggestion deleted successfully', suggestion: result.rows[0] });
   } catch (err) {
-    console.error('Error deleting suggestion:', err);
-    res.status(500).json({ error: 'Failed to delete suggestion' });
+    handleRouteError(res, 'Delete suggestion', err);
   }
 });
 

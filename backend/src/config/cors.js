@@ -1,56 +1,69 @@
-const DEFAULT_ALLOWED_ORIGINS = [
-  'http://localhost:3000',
+const DEVELOPMENT_ALLOWED_ORIGINS = [
   'http://localhost:3001',
-  'http://localhost:3002',
-  'http://localhost:3003',
-  'http://localhost:3004',
-  'http://localhost:3005',
-  'http://127.0.0.1:3000',
   'http://127.0.0.1:3001',
-  'http://127.0.0.1:3002',
-  'http://127.0.0.1:3003',
-  'http://127.0.0.1:3004',
-  'http://127.0.0.1:3005',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
+const PRODUCTION_ALLOWED_ORIGINS = [
   'https://nexa-strike.vercel.app',
   'https://www.nexa-strike.vercel.app',
 ];
 
-const parseAllowedOrigins = (value = '') => {
-  if (!value) return [];
-  return value
+const parseAllowedOrigins = (value = '') =>
+  value
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
+
+const isLocalOrigin = (origin) => {
+  try {
+    const parsedOrigin = new URL(origin);
+    return ['localhost', '127.0.0.1', '[::1]'].includes(parsedOrigin.hostname);
+  } catch {
+    return false;
+  }
+};
+
+const getAllowedOrigins = (env = process.env) => {
+  const isProduction = (env.NODE_ENV || '').toLowerCase() === 'production';
+  const configuredOrigins = [
+    ...parseAllowedOrigins(env.CORS_ORIGIN || ''),
+    ...parseAllowedOrigins(env.CORS_ALLOWED_ORIGINS || ''),
+  ].filter((origin) => !isProduction || !isLocalOrigin(origin));
+
+  return [...new Set([
+    ...PRODUCTION_ALLOWED_ORIGINS,
+    ...(isProduction ? [] : DEVELOPMENT_ALLOWED_ORIGINS),
+    ...configuredOrigins,
+  ])];
+};
+
+const isAllowedOrigin = (origin, env = process.env) =>
+  getAllowedOrigins(env).includes(origin);
+
+const originProtection = (env = process.env) => (req, res, next) => {
+  const origin = req.get('Origin');
+  if (origin && !isAllowedOrigin(origin, env)) {
+    return res.status(403).json({ error: 'Origin not allowed' });
+  }
+
+  const isStateChangingMethod = !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+  const hasAuthCookie = /(?:^|;)\s*(?:token|refreshToken)=/.test(req.headers.cookie || '');
+  if (isStateChangingMethod && hasAuthCookie && !origin) {
+    return res.status(403).json({ error: 'Origin required for cookie-authenticated requests' });
+  }
+
+  next();
 };
 
 const getCorsOptions = (env = process.env) => {
-  const configuredOrigins = [
-    ...parseAllowedOrigins(env.CORS_ORIGIN),
-    ...parseAllowedOrigins(env.CORS_ALLOWED_ORIGINS),
-    ...DEFAULT_ALLOWED_ORIGINS,
-  ];
-
-  const allowedOrigins = [...new Set(configuredOrigins)];
+  const allowedOrigins = getAllowedOrigins(env);
 
   return {
     origin: (origin, callback) => {
-      if (!origin) {
+      if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      try {
-        const hostname = new URL(origin).hostname;
-        const isLocalhost = ['localhost', '127.0.0.1'].includes(hostname);
-
-        if (isLocalhost) {
-          return callback(null, true);
-        }
-      } catch (error) {
-        // Ignore invalid origins and reject them below.
       }
 
       callback(new Error('Not allowed by CORS'));
@@ -63,7 +76,11 @@ const getCorsOptions = (env = process.env) => {
 };
 
 module.exports = {
-  DEFAULT_ALLOWED_ORIGINS,
-  parseAllowedOrigins,
+  DEVELOPMENT_ALLOWED_ORIGINS,
+  PRODUCTION_ALLOWED_ORIGINS,
+  getAllowedOrigins,
   getCorsOptions,
+  isAllowedOrigin,
+  originProtection,
+  parseAllowedOrigins,
 };

@@ -3,7 +3,8 @@ const router = express.Router();
 const pool = require('../config/database');
 const authMiddleware = require('../middleware/auth');
 const emailService = require('../services/emailService');
-const { validateId } = require('../middleware/validation');
+const { validateId, handleValidationErrors } = require('../middleware/validation');
+const handleRouteError = require('../utils/routeError');
 
 // Admin middleware - check if user is admin
 const adminMiddleware = async (req, res, next) => {
@@ -14,7 +15,7 @@ const adminMiddleware = async (req, res, next) => {
     }
     next();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Admin authorization', err);
   }
 };
 
@@ -30,7 +31,7 @@ router.get('/profile', authMiddleware, async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Get user profile', err);
   }
 });
 
@@ -42,7 +43,7 @@ router.get('/admin/all', authMiddleware, adminMiddleware, async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'List users', err);
   }
 });
 
@@ -76,7 +77,7 @@ router.post('/admin/:id/ban', authMiddleware, adminMiddleware, validateId, handl
 
     res.json({ message: 'User banned successfully', user: result.rows[0] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Ban user', err);
   }
 });
 
@@ -96,7 +97,7 @@ router.post('/admin/:id/unban', authMiddleware, adminMiddleware, validateId, han
 
     res.json({ message: 'User unbanned successfully', user: result.rows[0] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Unban user', err);
   }
 });
 
@@ -112,7 +113,7 @@ router.get('/:id', validateId, async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    handleRouteError(res, 'Get user', err);
   }
 });
 

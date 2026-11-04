@@ -61,7 +61,7 @@ router.post('/register', validateRegister, async (req, res) => {
       user: newUser 
     });
   } catch (err) {
-    console.error('Register error:', err);
+    console.error('Registration failed', { name: err?.name, code: err?.code });
     res.status(500).json({ error: 'Registration failed' });
   }
 });
@@ -125,7 +125,7 @@ router.post('/login', validateLogin, async (req, res) => {
       } 
     });
   } catch (err) {
-    console.error('Login error:', err);
+    console.error('Login failed', { name: err?.name, code: err?.code });
     res.status(500).json({ error: 'Login failed' });
   }
 });
@@ -193,7 +193,7 @@ router.post('/refresh', async (req, res) => {
     if (err.name === 'JsonWebTokenError') {
       return res.status(401).json({ error: 'Invalid refresh token' });
     }
-    console.error('Refresh error:', err);
+    console.error('Token refresh failed', { name: err?.name, code: err?.code });
     res.status(500).json({ error: 'Token refresh failed' });
   }
 });
@@ -212,7 +212,7 @@ router.post('/logout', authMiddleware, async (req, res) => {
 
     res.json({ message: 'Logged out successfully' });
   } catch (err) {
-    console.error('Logout error:', err);
+    console.error('Logout failed', { name: err?.name, code: err?.code });
     res.status(500).json({ error: 'Logout failed' });
   }
 });

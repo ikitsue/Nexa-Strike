@@ -14,7 +14,10 @@ const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
+  console.error('Unexpected database client error', {
+    name: err?.name,
+    code: err?.code,
+  });
 });
 
 module.exports = pool;

@@ -5,12 +5,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+const maxRequestBytes = 32768;
 
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const getDefaultKey = (keysVariable: string, legacyVariable: string) => {
   const keys = Deno.env.get(keysVariable);
@@ -33,9 +37,42 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
+  const contentLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(contentLength) && contentLength > maxRequestBytes) {
+    return jsonResponse({ error: "Request body is too large." }, 413);
+  }
+
+  const reader = request.body?.getReader();
+  if (!reader) {
+    return jsonResponse({ error: "Invalid request body" }, 400);
+  }
+
   let payload: Record<string, unknown>;
   try {
-    payload = await request.json();
+    const chunks: Uint8Array[] = [];
+    let bodyLength = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bodyLength += value.byteLength;
+      if (bodyLength > maxRequestBytes) {
+        await reader.cancel();
+        return jsonResponse({ error: "Request body is too large." }, 413);
+      }
+      chunks.push(value);
+    }
+
+    const body = new Uint8Array(bodyLength);
+    let offset = 0;
+    for (const chunk of chunks) {
+      body.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    const parsedPayload: unknown = JSON.parse(new TextDecoder().decode(body));
+    if (!isRecord(parsedPayload)) {
+      return jsonResponse({ error: "Invalid request body" }, 400);
+    }
+    payload = parsedPayload;
   } catch {
     return jsonResponse({ error: "Invalid request body" }, 400);
   }
@@ -142,24 +179,24 @@ Deno.serve(async (request) => {
   const adminClient = createClient(supabaseUrl, secretKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { data, error } = await adminClient
-    .from("tickets")
-    .insert({
-      owner_id: ownerId,
-      reporter_name: reporterName || null,
-      reporter_email: finalReporterEmail,
-      title,
-      message,
-      category,
-      priority,
-    })
-    .select("id")
-    .single();
+  const { data, error } = await adminClient.rpc("create_ticket_rate_limited", {
+    ticket_owner_id: ownerId,
+    ticket_reporter_name: reporterName || null,
+    ticket_reporter_email: finalReporterEmail,
+    ticket_title: title,
+    ticket_message: message,
+    ticket_category: category,
+    ticket_priority: priority,
+  });
 
   if (error) {
     console.error("Could not create support ticket:", error);
     return jsonResponse({ error: "The ticket could not be saved. Please try again." }, 500);
   }
 
-  return jsonResponse({ id: data.id });
+  if (data === null) {
+    return jsonResponse({ error: "Too many tickets submitted. Please try again later." }, 429);
+  }
+
+  return jsonResponse({ id: data });
 });

@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 require('dotenv').config();
-const { getCorsOptions } = require('./config/cors');
+const { getCorsOptions, originProtection } = require('./config/cors');
 
 // Validate required environment variables
 const requiredEnvVars = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'DB_PASSWORD'];
@@ -22,14 +22,15 @@ const { generalLimiter, authLimiter } = require('./middleware/rateLimiter');
 
 // Middleware - CORS with origin whitelist
 const corsOptions = getCorsOptions(process.env);
+app.use(originProtection(process.env));
 app.use(cors(corsOptions));
 
 // Apply general rate limiter
 app.use(generalLimiter);
 
 // Body parser middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '64kb', extended: false, parameterLimit: 100 }));
 
 // Security headers
 app.use((req, res, next) => {
@@ -71,23 +72,20 @@ app.use((req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  
-  // Don't expose error details in production
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const errorMessage = isDevelopment ? err.message : 'Internal server error';
-  
-  res.status(err.status || 500).json({ 
-    error: errorMessage,
-    ...(isDevelopment && { details: err.stack })
+  console.error('Request failed', {
+    method: req.method,
+    path: req.path,
+    name: err?.name,
+    code: err?.code,
   });
+  res.status(err.status || 500).json({ error: 'Request failed' });
 });
 
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT} [${process.env.NODE_ENV}]`);
-  console.log(`CORS enabled for: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}`);
+  console.log('CORS origin protection enabled');
 });
 
 // Graceful shutdown
