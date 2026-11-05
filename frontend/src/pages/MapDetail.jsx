@@ -128,11 +128,13 @@ const MapDetail = () => {
   const isMapHoverRef = useRef(false);
   const didDragMapRef = useRef(false);
   const dragPointerStartRef = useRef({ x: 0, y: 0 });
+  const dragPointerIdRef = useRef(null);
+  const activePointersRef = useRef(new Map());
+  const pinchStartRef = useRef(null);
   const [mapsList, setMapsList] = useState([]);
   const [mapsOpen, setMapsOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const mapsDropdownRef = useRef(null);
-  const dragPointerIdRef = useRef(null);
 
   useEffect(() => {
     if (loadedPreferencesMapId.current === id) return;
@@ -299,9 +301,44 @@ const MapDetail = () => {
   };
 
   useEffect(() => {
-    if (!isDragging) return undefined;
-
     const handlePointerMove = (e) => {
+      const pointer = activePointersRef.current.get(e.pointerId);
+      if (!pointer) return;
+
+      activePointersRef.current.set(e.pointerId, { ...pointer, x: e.clientX, y: e.clientY });
+      const touchPointers = [...activePointersRef.current.values()].filter((item) => item.pointerType === 'touch');
+      const pinchStart = pinchStartRef.current;
+
+      if (pinchStart && touchPointers.length >= 2) {
+        const [first, second] = touchPointers;
+        const distance = Math.hypot(second.x - first.x, second.y - first.y);
+        const midpointX = (first.x + second.x) / 2;
+        const midpointY = (first.y + second.y) / 2;
+        const container = zoomContainerRef.current;
+
+        if (container && pinchStart.distance > 0) {
+          const rect = container.getBoundingClientRect();
+          const nextZoom = Math.min(
+            Math.max(pinchStart.zoom * (distance / pinchStart.distance), 50),
+            220,
+          );
+          const scale = nextZoom / 100;
+          const initialScale = pinchStart.zoom / 100;
+          const pointX = (pinchStart.midpointX - rect.width / 2 - pinchStart.pan.x) / initialScale;
+          const pointY = (pinchStart.midpointY - rect.height / 2 - pinchStart.pan.y) / initialScale;
+          const nextPanX = midpointX - rect.left - rect.width / 2 - pointX * scale;
+          const nextPanY = midpointY - rect.top - rect.height / 2 - pointY * scale;
+
+          zoomRef.current = nextZoom;
+          panRef.current = { x: nextPanX, y: nextPanY };
+          setZoom(nextZoom);
+          setPanX(nextPanX);
+          setPanY(nextPanY);
+          didDragMapRef.current = true;
+        }
+        return;
+      }
+
       if (e.pointerId !== dragPointerIdRef.current) return;
 
       if (
@@ -321,9 +358,28 @@ const MapDetail = () => {
     };
 
     const handlePointerEnd = (e) => {
-      if (e.pointerId !== dragPointerIdRef.current) return;
-      dragPointerIdRef.current = null;
-      setIsDragging(false);
+      if (!activePointersRef.current.has(e.pointerId)) return;
+
+      activePointersRef.current.delete(e.pointerId);
+      const touchPointers = [...activePointersRef.current.entries()]
+        .filter(([, pointer]) => pointer.pointerType === 'touch');
+
+      if (pinchStartRef.current) {
+        pinchStartRef.current = null;
+        if (touchPointers.length === 1) {
+          const [pointerId, pointer] = touchPointers[0];
+          dragPointerIdRef.current = pointerId;
+          dragPointerStartRef.current = { x: pointer.x, y: pointer.y };
+          setDragStart({ x: pointer.x - panRef.current.x, y: pointer.y - panRef.current.y });
+          setIsDragging(true);
+          return;
+        }
+      }
+
+      if (e.pointerId === dragPointerIdRef.current) {
+        dragPointerIdRef.current = null;
+        setIsDragging(false);
+      }
     };
 
     window.addEventListener('pointermove', handlePointerMove);
@@ -334,7 +390,7 @@ const MapDetail = () => {
       window.removeEventListener('pointerup', handlePointerEnd);
       window.removeEventListener('pointercancel', handlePointerEnd);
     };
-  }, [isDragging, dragStart]);
+  }, [dragStart]);
 
   useEffect(() => {
     const handleGlobalWheel = (e) => {
@@ -616,9 +672,33 @@ const MapDetail = () => {
   };
 
   const handlePointerDown = (e) => {
-    if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (e.pointerType === 'mouse' ? (!e.isPrimary || e.button !== 0) : (!e.isPrimary && e.pointerType !== 'touch')) return;
 
     didDragMapRef.current = false;
+    activePointersRef.current.set(e.pointerId, {
+      x: e.clientX,
+      y: e.clientY,
+      pointerType: e.pointerType,
+    });
+
+    const touchPointers = [...activePointersRef.current.values()].filter((pointer) => pointer.pointerType === 'touch');
+    if (touchPointers.length >= 2) {
+      const [first, second] = touchPointers;
+      const rect = zoomContainerRef.current?.getBoundingClientRect();
+      if (rect) {
+        pinchStartRef.current = {
+          distance: Math.hypot(second.x - first.x, second.y - first.y),
+          zoom: zoomRef.current,
+          pan: panRef.current,
+          midpointX: (first.x + second.x) / 2 - rect.left,
+          midpointY: (first.y + second.y) / 2 - rect.top,
+        };
+      }
+      dragPointerIdRef.current = null;
+      setIsDragging(false);
+      return;
+    }
+
     dragPointerIdRef.current = e.pointerId;
     dragPointerStartRef.current = { x: e.clientX, y: e.clientY };
     setIsDragging(true);
