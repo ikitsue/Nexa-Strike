@@ -22,6 +22,8 @@ const ImageLightbox = ({
   const closeButtonRef = useRef(null);
   const imageRef = useRef(null);
   const dragRef = useRef(null);
+  const activePointersRef = useRef(new Map());
+  const pinchRef = useRef(null);
 
   useEffect(() => {
     setImageSrc(src);
@@ -82,8 +84,41 @@ const ImageLightbox = ({
   };
 
   const handlePointerDown = (event) => {
-    if (zoom.scale === 1 || event.button !== 0) return;
+    if (event.pointerType === 'touch') {
+      activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      event.currentTarget.setPointerCapture(event.pointerId);
 
+      const touchPointers = [...activePointersRef.current.values()];
+      if (touchPointers.length >= 2) {
+        const [first, second] = touchPointers;
+        const rect = imageRef.current.getBoundingClientRect();
+        pinchRef.current = {
+          distance: Math.hypot(second.x - first.x, second.y - first.y),
+          midpointX: (first.x + second.x) / 2,
+          midpointY: (first.y + second.y) / 2,
+          scale: zoom.scale,
+          x: zoom.x,
+          y: zoom.y,
+          centerX: rect.left + rect.width / 2 - zoom.x,
+          centerY: rect.top + rect.height / 2 - zoom.y,
+        };
+        dragRef.current = null;
+        return;
+      }
+
+      if (zoom.scale > 1) {
+        dragRef.current = {
+          pointerId: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          zoomX: zoom.x,
+          zoomY: zoom.y,
+        };
+      }
+      return;
+    }
+
+    if (zoom.scale === 1 || event.button !== 0) return;
     dragRef.current = {
       pointerId: event.pointerId,
       x: event.clientX,
@@ -95,6 +130,29 @@ const ImageLightbox = ({
   };
 
   const handlePointerMove = (event) => {
+    if (activePointersRef.current.has(event.pointerId)) {
+      activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      const touchPointers = [...activePointersRef.current.values()];
+      const pinch = pinchRef.current;
+
+      if (pinch && touchPointers.length >= 2 && pinch.distance > 0) {
+        const [first, second] = touchPointers;
+        const distance = Math.hypot(second.x - first.x, second.y - first.y);
+        const midpointX = (first.x + second.x) / 2;
+        const midpointY = (first.y + second.y) / 2;
+        const scale = Math.min(5, Math.max(1, pinch.scale * (distance / pinch.distance)));
+        const pointX = (pinch.midpointX - pinch.centerX - pinch.x) / pinch.scale;
+        const pointY = (pinch.midpointY - pinch.centerY - pinch.y) / pinch.scale;
+
+        setZoom(scale === 1 ? { scale: 1, x: 0, y: 0 } : {
+          scale,
+          x: midpointX - pinch.centerX - pointX * scale,
+          y: midpointY - pinch.centerY - pointY * scale,
+        });
+        return;
+      }
+    }
+
     if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
 
     setZoom((current) => ({
@@ -105,7 +163,26 @@ const ImageLightbox = ({
   };
 
   const handlePointerUp = (event) => {
-    if (dragRef.current?.pointerId === event.pointerId) dragRef.current = null;
+    const wasPinching = Boolean(pinchRef.current);
+    if (activePointersRef.current.has(event.pointerId)) {
+      activePointersRef.current.delete(event.pointerId);
+      if (wasPinching) pinchRef.current = null;
+
+      const remainingPointers = [...activePointersRef.current.entries()];
+      if (remainingPointers.length === 1 && zoom.scale > 1) {
+        const [pointerId, pointer] = remainingPointers[0];
+        dragRef.current = {
+          pointerId,
+          x: pointer.x,
+          y: pointer.y,
+          zoomX: zoom.x,
+          zoomY: zoom.y,
+        };
+        return;
+      }
+    }
+
+    if (dragRef.current?.pointerId === event.pointerId || wasPinching) dragRef.current = null;
   };
 
   return (
