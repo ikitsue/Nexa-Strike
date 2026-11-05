@@ -514,8 +514,17 @@ const loadTicketConversations = async (ticketQuery, includeAuthorUsernames = fal
 export const ticketsAPI = {
   getMine: async () => {
     try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      if (!user?.email) throw new Error('You must be signed in to fetch your support tickets');
+
+      const emailPattern = user.email.replace(/[\\%_"]/g, '\\$&');
       return await loadTicketConversations(
-        supabase.from('tickets').select('*').order('updated_at', { ascending: false })
+        supabase
+          .from('tickets')
+          .select('*')
+          .or(`owner_id.eq.${user.id},and(owner_id.is.null,reporter_email.ilike."${emailPattern}")`)
+          .order('updated_at', { ascending: false })
       );
     } catch (error) {
       throw new Error(error.message || 'Failed to fetch your support tickets');
