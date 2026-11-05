@@ -427,3 +427,24 @@
 :root[data-theme='light'] .utility-manager .btn-place-line:focus-visible {
   outline-color: var(--accent);
 }
+
+:root .ticket-actions button:not(.danger),
+:root .ticket-reply-form button {
+  color: #1b0e06;
+  background: linear-gradient(135deg, #ff8a2e, #ff5b16);
+}
+
+:root .ticket-actions button:not(.danger):not(:disabled):hover,
+:root .ticket-reply-form button:not(:disabled):hover {
+  color: #1b0e06;
+  background: linear-gradient(135deg, #ffad52, #ff7622);
+}
+
+:root .ticket-actions button.danger {
+  color: #fff;
+  background: linear-gradient(135deg, #ff7168, #d93636);
+}
+
+:root .ticket-actions button.danger:not(:disabled):hover {
+  background: linear-gradient(135deg, #ff887f, #e44742);
+}
