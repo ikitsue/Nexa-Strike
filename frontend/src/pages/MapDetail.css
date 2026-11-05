@@ -72,6 +72,16 @@
   gap: 1rem;
 }
 
+.map-detail-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mobile-filters-toggle {
+  display: none;
+}
+
 .point-meta-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -770,6 +780,34 @@
 
   .map-stage {
     min-height: 420px;
+  }
+
+  .mobile-filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid #334155;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #e2e8f0;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .mobile-filters-toggle span {
+    color: #7dd3fc;
+    font-weight: 700;
+  }
+
+  .mobile-filters-toggle:hover {
+    border-color: #38bdf8;
+  }
+
+  .map-detail-filters.is-collapsed {
+    display: none;
   }
 
   .view-tabs {

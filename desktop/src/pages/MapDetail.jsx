@@ -130,7 +130,9 @@ const MapDetail = () => {
   const dragPointerStartRef = useRef({ x: 0, y: 0 });
   const [mapsList, setMapsList] = useState([]);
   const [mapsOpen, setMapsOpen] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const mapsDropdownRef = useRef(null);
+  const dragPointerIdRef = useRef(null);
 
   useEffect(() => {
     if (loadedPreferencesMapId.current === id) return;
@@ -299,7 +301,9 @@ const MapDetail = () => {
   useEffect(() => {
     if (!isDragging) return undefined;
 
-    const handleMouseMove = (e) => {
+    const handlePointerMove = (e) => {
+      if (e.pointerId !== dragPointerIdRef.current) return;
+
       if (
         Math.hypot(
           e.clientX - dragPointerStartRef.current.x,
@@ -316,15 +320,19 @@ const MapDetail = () => {
       panRef.current = { x: nextPanX, y: nextPanY };
     };
 
-    const handleMouseUp = () => {
+    const handlePointerEnd = (e) => {
+      if (e.pointerId !== dragPointerIdRef.current) return;
+      dragPointerIdRef.current = null;
       setIsDragging(false);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerEnd);
+    window.addEventListener('pointercancel', handlePointerEnd);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerEnd);
+      window.removeEventListener('pointercancel', handlePointerEnd);
     };
   }, [isDragging, dragStart]);
 
@@ -608,14 +616,14 @@ const MapDetail = () => {
     ));
   };
 
-  const handleMouseDown = (e) => {
-    if (e.button === 0) {
-      e.preventDefault();
-      didDragMapRef.current = false;
-      dragPointerStartRef.current = { x: e.clientX, y: e.clientY };
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - panRef.current.x, y: e.clientY - panRef.current.y });
-    }
+  const handlePointerDown = (e) => {
+    if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+
+    didDragMapRef.current = false;
+    dragPointerIdRef.current = e.pointerId;
+    dragPointerStartRef.current = { x: e.clientX, y: e.clientY };
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - panRef.current.x, y: e.clientY - panRef.current.y });
   };
 
   const loadMapById = (mapId) => {
@@ -686,44 +694,49 @@ const MapDetail = () => {
             )}
           </section>
 
-          <section className="control-card">
-            <h2>{t('nadeType')}</h2>
-            <div className="filter-pills">
-              {Object.keys(filters).map((type) => (
-                <button
-                  key={type}
-                  className={`pill-button ${filters[type] ? 'active' : ''}`}
-                  style={{
-                    borderColor: filters[type] ? utilityColors[type] : '#334155',
-                    color: filters[type] ? '#fff' : '#cbd5e1',
-                    backgroundColor: filters[type] ? `${utilityColors[type]}22` : 'transparent',
-                  }}
-                  onClick={() => toggleFilter(type)}
-                >
-                  <span className="pill-emoji">
-                    {type === 'smoke' ? '💨' : type === 'flash' ? '⚡' : type === 'molotov' ? '🔥' : type === 'grenade' ? '💥' : type === 'line' ? '─' : '•'}
-                  </span>
-                  <span>{t(type)}</span>
-                  <span className="pill-count">{counts[type] || 0}</span>
-                </button>
-              ))}
-            </div>
-          </section>
+          <div
+            id="map-detail-filters"
+            className={`map-detail-filters${mobileFiltersOpen ? '' : ' is-collapsed'}`}
+          >
+            <section className="control-card">
+              <h2>{t('nadeType')}</h2>
+              <div className="filter-pills">
+                {Object.keys(filters).map((type) => (
+                  <button
+                    key={type}
+                    className={`pill-button ${filters[type] ? 'active' : ''}`}
+                    style={{
+                      borderColor: filters[type] ? utilityColors[type] : '#334155',
+                      color: filters[type] ? '#fff' : '#cbd5e1',
+                      backgroundColor: filters[type] ? `${utilityColors[type]}22` : 'transparent',
+                    }}
+                    onClick={() => toggleFilter(type)}
+                  >
+                    <span className="pill-emoji">
+                      {type === 'smoke' ? '💨' : type === 'flash' ? '⚡' : type === 'molotov' ? '🔥' : type === 'grenade' ? '💥' : type === 'line' ? '─' : '•'}
+                    </span>
+                    <span>{t(type)}</span>
+                    <span className="pill-count">{counts[type] || 0}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
 
-          <section className="control-card">
-            <h2>{t('team')}</h2>
-            <div className="team-buttons">
-              {['all', 'ct', 't'].map((team) => (
-                <button
-                  key={team}
-                  className={`team-button ${selectedTeam === team ? 'active' : ''}`}
-                  onClick={() => setSelectedTeam(team)}
-                >
-                  {team === 'all' ? t('allTeams') : team.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </section>
+            <section className="control-card">
+              <h2>{t('team')}</h2>
+              <div className="team-buttons">
+                {['all', 'ct', 't'].map((team) => (
+                  <button
+                    key={team}
+                    className={`team-button ${selectedTeam === team ? 'active' : ''}`}
+                    onClick={() => setSelectedTeam(team)}
+                  >
+                    {team === 'all' ? t('allTeams') : team.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
 
           {/* Other Options removed per request */}
 
@@ -768,11 +781,21 @@ const MapDetail = () => {
                   +
                 </button>
               </div>
+              <button
+                type="button"
+                className="mobile-filters-toggle"
+                aria-expanded={mobileFiltersOpen}
+                aria-controls="map-detail-filters"
+                onClick={() => setMobileFiltersOpen((open) => !open)}
+              >
+                <span aria-hidden="true">{mobileFiltersOpen ? '−' : '+'}</span>
+                {mobileFiltersOpen ? t('hideFilters') : t('showFilters')}
+              </button>
             </div>
 
             <div
               className="map-stage"
-              onMouseDown={handleMouseDown}
+              onPointerDown={handlePointerDown}
               onMouseEnter={() => {
                 isMapHoverRef.current = true;
               }}
