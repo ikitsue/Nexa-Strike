@@ -1190,13 +1190,52 @@
     border-radius: 12px;
   }
 
+  .utility-map-marker.zone-marker .marker-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .utility-map-marker.line-group-marker .line-group-dot,
+  .utility-map-marker.line-group-child-marker .line-group-child-dot {
+    width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+  }
+
+  .utility-map-marker.line-marker .line-group-dot,
+  .utility-map-marker.line-group-child-marker .line-group-child-dot {
+    width: 8px;
+    height: 8px;
+    border-width: 0.75px;
+    box-shadow: none;
+  }
+
   .points-list {
     max-height: 320px;
+    overflow-x: hidden;
   }
 
   .point-card {
     gap: 0.65rem;
     border-radius: 10px;
+    min-width: 0;
+  }
+
+  .point-actions {
+    flex: 0 0 auto;
+    gap: 0.35rem;
+  }
+
+  .point-actions .btn-edit,
+  .point-actions .btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 2rem;
+    width: 2rem;
+    min-width: 0;
+    height: 2rem;
+    padding: 0;
   }
 
   .btn-delete {

@@ -69,6 +69,7 @@ const UtilityManager = () => {
   const [panY, setPanY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const mapImageRef = useRef(null);
@@ -76,6 +77,10 @@ const UtilityManager = () => {
   const zoomRef = useRef(100);
   const panRef = useRef({ x: 0, y: 0 });
   const didDragMapRef = useRef(false);
+  const activeMapPointersRef = useRef(new Map());
+  const pinchStartRef = useRef(null);
+  const dragPointerIdRef = useRef(null);
+  const dragPointerStartRef = useRef({ x: 0, y: 0 });
   const loadedPreferencesMapId = useRef(mapQueryId);
   const skipPreferenceSave = useRef(false);
 
@@ -471,10 +476,12 @@ const UtilityManager = () => {
     event.preventDefault();
     didDragMapRef.current = false;
     setIsDragging(true);
-    setDragStart({
+    const nextDragStart = {
       x: event.clientX - panRef.current.x,
       y: event.clientY - panRef.current.y,
-    });
+    };
+    dragStartRef.current = nextDragStart;
+    setDragStart(nextDragStart);
   };
 
   useEffect(() => {
@@ -500,6 +507,161 @@ const UtilityManager = () => {
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragStart]);
+
+  const handleMapPointerDown = (event) => {
+    if (event.pointerType !== 'touch') return;
+
+    if (activeMapPointersRef.current.size === 0) {
+      didDragMapRef.current = false;
+    }
+
+    activeMapPointersRef.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
+
+    const touchPointers = [...activeMapPointersRef.current.values()];
+    if (touchPointers.length >= 2) {
+      const [first, second] = touchPointers;
+      const stage = mapStageRef.current;
+      const rect = stage?.getBoundingClientRect();
+      const distance = Math.hypot(second.x - first.x, second.y - first.y);
+      if (stage && rect && distance > 0) {
+        pinchStartRef.current = {
+          distance,
+          zoom: zoomRef.current,
+          pan: panRef.current,
+          midpointX: (first.x + second.x) / 2 - rect.left - stage.clientLeft,
+          midpointY: (first.y + second.y) / 2 - rect.top - stage.clientTop,
+        };
+      }
+      dragPointerIdRef.current = null;
+      setIsDragging(true);
+      return;
+    }
+
+    dragPointerIdRef.current = event.pointerId;
+    dragPointerStartRef.current = { x: event.clientX, y: event.clientY };
+    const nextDragStart = {
+      x: event.clientX - panRef.current.x,
+      y: event.clientY - panRef.current.y,
+    };
+    dragStartRef.current = nextDragStart;
+    setDragStart(nextDragStart);
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    const handleTouchPointerMove = (event) => {
+      const pointer = activeMapPointersRef.current.get(event.pointerId);
+      if (!pointer) return;
+
+      activeMapPointersRef.current.set(event.pointerId, {
+        ...pointer,
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      const touchPointers = [...activeMapPointersRef.current.values()];
+      const pinchStart = pinchStartRef.current;
+      const stage = mapStageRef.current;
+
+      if (pinchStart && touchPointers.length >= 2 && stage) {
+        const [first, second] = touchPointers;
+        const distance = Math.hypot(second.x - first.x, second.y - first.y);
+        const midpointX = (first.x + second.x) / 2;
+        const midpointY = (first.y + second.y) / 2;
+        const rect = stage.getBoundingClientRect();
+        const previousScale = pinchStart.zoom / 100;
+        const nextZoom = Math.min(
+          Math.max(pinchStart.zoom * (distance / pinchStart.distance), 50),
+          200,
+        );
+        const scaleRatio = (nextZoom / 100) / previousScale;
+        const radians = (rotation * Math.PI) / 180;
+        const cos = Math.cos(radians);
+        const sin = Math.sin(radians);
+        const initialMidpointX = pinchStart.midpointX - stage.clientWidth / 2 - pinchStart.pan.x;
+        const initialMidpointY = pinchStart.midpointY - stage.clientHeight / 2 - pinchStart.pan.y;
+        const unrotatedX = cos * initialMidpointX + sin * initialMidpointY;
+        const unrotatedY = -sin * initialMidpointX + cos * initialMidpointY;
+        const localMidpointX = midpointX - rect.left - stage.clientLeft;
+        const localMidpointY = midpointY - rect.top - stage.clientTop;
+        const nextPan = {
+          x: localMidpointX - stage.clientWidth / 2
+            - (cos * unrotatedX * scaleRatio - sin * unrotatedY * scaleRatio),
+          y: localMidpointY - stage.clientHeight / 2
+            - (sin * unrotatedX * scaleRatio + cos * unrotatedY * scaleRatio),
+        };
+
+        zoomRef.current = nextZoom;
+        panRef.current = nextPan;
+        setZoom(nextZoom);
+        setPanX(nextPan.x);
+        setPanY(nextPan.y);
+        didDragMapRef.current = true;
+        return;
+      }
+
+      if (event.pointerId !== dragPointerIdRef.current) return;
+      if (Math.hypot(
+        event.clientX - dragPointerStartRef.current.x,
+        event.clientY - dragPointerStartRef.current.y,
+      ) > 3) {
+        didDragMapRef.current = true;
+      }
+
+      const nextPan = {
+        x: event.clientX - dragStartRef.current.x,
+        y: event.clientY - dragStartRef.current.y,
+      };
+      panRef.current = nextPan;
+      setPanX(nextPan.x);
+      setPanY(nextPan.y);
+    };
+
+    const handleTouchPointerEnd = (event) => {
+      if (!activeMapPointersRef.current.has(event.pointerId)) return;
+
+      activeMapPointersRef.current.delete(event.pointerId);
+      const remainingPointers = [...activeMapPointersRef.current.entries()];
+
+      if (pinchStartRef.current) {
+        pinchStartRef.current = null;
+        setZoom(zoomRef.current);
+        setPanX(panRef.current.x);
+        setPanY(panRef.current.y);
+        if (remainingPointers.length === 1) {
+          const [pointerId, pointer] = remainingPointers[0];
+          dragPointerIdRef.current = pointerId;
+          dragPointerStartRef.current = { x: pointer.x, y: pointer.y };
+          const nextDragStart = {
+            x: pointer.x - panRef.current.x,
+            y: pointer.y - panRef.current.y,
+          };
+          dragStartRef.current = nextDragStart;
+          setDragStart(nextDragStart);
+          return;
+        }
+      }
+
+      if (event.pointerId === dragPointerIdRef.current) {
+        dragPointerIdRef.current = null;
+      }
+      if (remainingPointers.length === 0) {
+        setIsDragging(false);
+      }
+    };
+
+    window.addEventListener('pointermove', handleTouchPointerMove);
+    window.addEventListener('pointerup', handleTouchPointerEnd);
+    window.addEventListener('pointercancel', handleTouchPointerEnd);
+    return () => {
+      window.removeEventListener('pointermove', handleTouchPointerMove);
+      window.removeEventListener('pointerup', handleTouchPointerEnd);
+      window.removeEventListener('pointercancel', handleTouchPointerEnd);
+    };
+  }, [rotation]);
 
   const handleMapWheel = (event) => {
     if (event.deltaY === 0) return;
@@ -1260,6 +1422,7 @@ const UtilityManager = () => {
                     ref={mapStageRef}
                     onClick={handleMapClick}
                     onMouseDown={handleMapMouseDown}
+                    onPointerDown={handleMapPointerDown}
                     style={{
                       cursor: (isPlacingMarker || isPlacingLine || isPlacingLineGroup) ? 'crosshair' : isDragging ? 'grabbing' : 'grab',
                     }}
