@@ -57,6 +57,7 @@ const UtilityManager = () => {
   const [selectedLineGroup, setSelectedLineGroup] = useState(null);
   const [selectedLinePoint, setSelectedLinePoint] = useState(null);
   const [utilityFilters, setUtilityFilters] = useState(() => getUtilityManagerPreferences(mapQueryId).utilityFilters);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [activePlacementType, setActivePlacementType] = useState('smoke');
   const [selectedPlacementTeam, setSelectedPlacementTeam] = useState('t');
   const [showZoneTypeDropdown, setShowZoneTypeDropdown] = useState(false);
@@ -1177,7 +1178,22 @@ const UtilityManager = () => {
                 {/* Map */}
                 <div className="map-section">
                   <div className="utility-filter-bar">
-                    <div className="utility-map-filters">
+                    <button
+                      type="button"
+                      className="utility-mobile-filters-toggle"
+                      aria-expanded={mobileFiltersOpen}
+                      aria-controls="utility-manager-filters"
+                      aria-label={mobileFiltersOpen ? t('hideFilters') : t('showFilters')}
+                      onClick={() => setMobileFiltersOpen((open) => !open)}
+                    >
+                      <span aria-hidden="true">{mobileFiltersOpen ? '−' : '+'}</span>
+                      <span>{mobileFiltersOpen ? t('hideFilters') : t('showFilters')}</span>
+                    </button>
+                    <div
+                      id="utility-manager-filters"
+                      className={`utility-filter-controls${mobileFiltersOpen ? '' : ' is-collapsed'}`}
+                    >
+                      <div className="utility-map-filters">
                       {[
                         ['smoke', '💨'],
                         ['flash', '⚡'],
@@ -1201,17 +1217,18 @@ const UtilityManager = () => {
                           </span>
                         </button>
                       ))}
-                    </div>
-                    <div className="utility-team-filters">
-                      {['all', 'ct', 't'].map((team) => (
-                        <button
-                          key={team}
-                          className={`filter-btn team-filter-btn ${selectedTeam === team ? 'active' : ''}`}
-                          onClick={() => setSelectedTeam(team)}
-                        >
-                          {team === 'all' ? t('allTeams') : team.toUpperCase()}
-                        </button>
-                      ))}
+                      </div>
+                      <div className="utility-team-filters">
+                        {['all', 'ct', 't'].map((team) => (
+                          <button
+                            key={team}
+                            className={`filter-btn team-filter-btn ${selectedTeam === team ? 'active' : ''}`}
+                            onClick={() => setSelectedTeam(team)}
+                          >
+                            {team === 'all' ? t('allTeams') : team.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     {isPlacingLineGroup && selectedParentZone && <span className="parent-indicator">{t('parentZone')}: {selectedParentZone.name}</span>}
                     {isPlacingLine && (selectedLineGroup || selectedParentZone) && (
