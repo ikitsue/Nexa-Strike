@@ -1,14 +1,39 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../i18n';
 import { useCookieConsent } from '../../../shared/consent/CookieConsent';
+import { achievementsAPI } from '../api/supabaseApi';
+import { useAuthStore } from '../store/authStore';
 import './Footer.css';
 
 const Footer = () => {
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
+  const { user, authReady } = useAuthStore();
+  const [cookieAchievementLoading, setCookieAchievementLoading] = React.useState(false);
+  const [cookieAchievementError, setCookieAchievementError] = React.useState(false);
   const currentYear = new Date().getFullYear();
   const appVersion = window.__APP_VERSION__ || 'dev';
   const { openSettings } = useCookieConsent();
+  const handleCookieEgg = async () => {
+    if (!authReady || cookieAchievementLoading) return;
+
+    setCookieAchievementError(false);
+    if (user?.authUserId) {
+      setCookieAchievementLoading(true);
+      try {
+        await achievementsAPI.unlock('mobile');
+      } catch (error) {
+        console.error('Failed to unlock the mobile footer achievement:', error);
+        setCookieAchievementError(true);
+        setCookieAchievementLoading(false);
+        return;
+      }
+      setCookieAchievementLoading(false);
+    }
+
+    navigate('/Easter-egg');
+  };
   const legalLabels = {
     en: { notice: 'Legal notice', cookies: 'Cookies', settings: 'Cookie settings', contactOptions: 'Choose an email service' },
     fr: { notice: 'Mentions légales', cookies: 'Cookies', settings: 'Paramètres des cookies', contactOptions: 'Choisir un service e-mail' },
@@ -80,6 +105,16 @@ const Footer = () => {
           </div>
           
           <div className="footer-social">
+            <button
+              type="button"
+              className="footer-cookie-egg"
+              onClick={handleCookieEgg}
+              disabled={!authReady || cookieAchievementLoading}
+              aria-busy={cookieAchievementLoading}
+            >
+              <span aria-hidden="true">🍪</span>
+              {t('footerCookieEgg')}
+            </button>
             <a href="https://github.com/ikitsue" target="_blank" rel="noopener noreferrer" aria-label={t('github')}>
               <i className="fab fa-github" aria-hidden="true"></i> {t('github')}
             </a>
@@ -102,6 +137,11 @@ const Footer = () => {
               <span aria-hidden="true">↑</span>
             </button>
           </div>
+          {cookieAchievementError && (
+            <p className="footer-cookie-egg-error" role="alert">
+              {t('easterEggUnlockError')}
+            </p>
+          )}
         </div>
       </div>
     </footer>

@@ -14,6 +14,7 @@ const EasterEgg = () => {
   const [suggestersError, setSuggestersError] = useState(false);
   const [realtimeError, setRealtimeError] = useState(false);
   const [explorerUnlocked, setExplorerUnlocked] = useState(false);
+  const [mobileUnlocked, setMobileUnlocked] = useState(false);
   const [achievementLoading, setAchievementLoading] = useState(false);
   const [achievementError, setAchievementError] = useState(false);
 
@@ -90,6 +91,7 @@ const EasterEgg = () => {
 
     if (!user?.authUserId) {
       setExplorerUnlocked(false);
+      setMobileUnlocked(false);
       setAchievementLoading(false);
       return () => {
         cancelled = true;
@@ -97,12 +99,14 @@ const EasterEgg = () => {
     }
 
     setExplorerUnlocked(false);
+    setMobileUnlocked(false);
     setAchievementError(false);
     setAchievementLoading(true);
     achievementsAPI.getMine()
       .then(({ data }) => {
         if (!cancelled) {
           setExplorerUnlocked(data.some(({ achievement_id }) => achievement_id === 'explorer'));
+          setMobileUnlocked(data.some(({ achievement_id }) => achievement_id === 'mobile'));
           setAchievementError(false);
         }
       })
@@ -174,6 +178,11 @@ const EasterEgg = () => {
           {explorerUnlocked && (
             <p className="easter-egg__message" role="status">
               {t('easterEggSavedToProfile')}
+            </p>
+          )}
+          {mobileUnlocked && (
+            <p className="easter-egg__message" role="status">
+              {t('achievementUnlockedPrefix')} {t('achievementMobile')}
             </p>
           )}
           <Link to="/" className="easter-egg__link">

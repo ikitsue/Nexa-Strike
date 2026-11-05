@@ -786,7 +786,7 @@ export const achievementsAPI = {
 
   unlock: async (achievementId) => {
     try {
-      if (!['explorer', 'ticket', 'desktop'].includes(achievementId)) {
+      if (!['explorer', 'ticket', 'desktop', 'mobile'].includes(achievementId)) {
         throw new Error('Unsupported achievement');
       }
 
