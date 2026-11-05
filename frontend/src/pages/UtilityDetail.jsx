@@ -259,7 +259,7 @@ const UtilityDetail = () => {
 
   return (
     <main className="utility-detail">
-      <div className="utility-detail__layout">
+      <div className={`utility-detail__layout${youtubeEmbedUrl ? ' utility-detail__layout--youtube' : ''}`}>
         <div className="utility-detail__main">
           <header className="utility-detail__heading">
             <h1>{point.name || t('unknown')}</h1>
@@ -281,7 +281,10 @@ const UtilityDetail = () => {
             </Link>
           </header>
 
-          <section className="utility-detail__media" aria-label={point.name || t('unknown')}>
+          <section
+            className={`utility-detail__media${youtubeEmbedUrl ? ' utility-detail__media--youtube' : ''}`}
+            aria-label={point.name || t('unknown')}
+          >
             {youtubeEmbedUrl ? (
               preferences.externalMedia ? (
                 showYoutubeIntro ? (

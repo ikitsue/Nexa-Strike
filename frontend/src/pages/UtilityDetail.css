@@ -391,6 +391,52 @@
     min-height: 180px;
   }
 
+  .utility-detail__media--youtube {
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+  }
+
+  .utility-detail__media--youtube .utility-detail__video--embed,
+  .utility-detail__media--youtube .utility-detail__youtube-intro {
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .utility-detail__media--youtube .utility-detail__youtube-intro {
+    padding: 1rem;
+  }
+
+  .utility-detail__layout--youtube {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .utility-detail__layout--youtube .utility-detail__main {
+    display: contents;
+  }
+
+  .utility-detail__layout--youtube .utility-detail__heading {
+    order: 1;
+  }
+
+  .utility-detail__layout--youtube .utility-detail__media {
+    order: 2;
+  }
+
+  .utility-detail__layout--youtube .utility-detail__info {
+    order: 3;
+  }
+
+  .utility-detail__layout--youtube .utility-detail__zoom-gallery {
+    order: 4;
+  }
+
+  .utility-detail__layout--youtube .utility-detail__tags {
+    order: 5;
+  }
+
   .utility-detail__info {
     padding: 1rem;
   }
