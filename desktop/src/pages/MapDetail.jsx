@@ -133,7 +133,8 @@ const MapDetail = () => {
   const [mapsList, setMapsList] = useState([]);
   const [mapsOpen, setMapsOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const mapsDropdownRef = useRef(null);
+  const headerMapsDropdownRef = useRef(null);
+  const sidebarMapsDropdownRef = useRef(null);
   const dragPointerIdRef = useRef(null);
 
   useEffect(() => {
@@ -262,7 +263,9 @@ const MapDetail = () => {
 
   useEffect(() => {
     const handleOutside = (e) => {
-      if (mapsDropdownRef.current && !mapsDropdownRef.current.contains(e.target)) {
+      const clickedInsideHeaderSelector = headerMapsDropdownRef.current?.contains(e.target);
+      const clickedInsideSidebarSelector = sidebarMapsDropdownRef.current?.contains(e.target);
+      if (!clickedInsideHeaderSelector && !clickedInsideSidebarSelector) {
         setMapsOpen(false);
       }
     };
@@ -751,22 +754,64 @@ const MapDetail = () => {
           <Link to="/maps" className="map-title-link">
             <h1>{map.name}</h1>
           </Link>
+          <section className="map-selector-control map-selector-control--header" ref={headerMapsDropdownRef}>
+            <button
+              type="button"
+              className="select-pill"
+              aria-expanded={mapsOpen}
+              aria-haspopup="listbox"
+              onClick={() => setMapsOpen((open) => !open)}
+            >
+              <span>{map.name}</span>
+              <span aria-hidden="true">▾</span>
+            </button>
+
+            {mapsOpen && (
+              <div className="map-dropdown" role="listbox" aria-label={t('switchMap')}>
+                {mapsList.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className="map-dropdown-item"
+                    role="option"
+                    aria-selected={String(m.id) === id}
+                    onClick={() => loadMapById(m.id)}
+                  >
+                    {m.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       </header>
 
       <div className="map-detail-shell">
         <aside className="map-sidebar">
-          <section className="control-card" ref={mapsDropdownRef}>
+          <section className="control-card map-selector-control map-selector-control--sidebar" ref={sidebarMapsDropdownRef}>
             <h2>{t('switchMap')}</h2>
-            <div className="select-pill" onClick={() => setMapsOpen((s) => !s)} style={{ cursor: 'pointer' }}>
+            <button
+              type="button"
+              className="select-pill"
+              aria-expanded={mapsOpen}
+              aria-haspopup="listbox"
+              onClick={() => setMapsOpen((open) => !open)}
+            >
               <span>{map.name}</span>
-              <span>▾</span>
-            </div>
+              <span aria-hidden="true">▾</span>
+            </button>
 
             {mapsOpen && (
-              <div className="map-dropdown">
+              <div className="map-dropdown" role="listbox" aria-label={t('switchMap')}>
                 {mapsList.map((m) => (
-                  <button key={m.id} className="map-dropdown-item" onClick={() => loadMapById(m.id)}>
+                  <button
+                    key={m.id}
+                    type="button"
+                    className="map-dropdown-item"
+                    role="option"
+                    aria-selected={String(m.id) === id}
+                    onClick={() => loadMapById(m.id)}
+                  >
                     {m.name}
                   </button>
                 ))}
@@ -866,10 +911,13 @@ const MapDetail = () => {
                 className="mobile-filters-toggle"
                 aria-expanded={mobileFiltersOpen}
                 aria-controls="map-detail-filters"
+                aria-label={mobileFiltersOpen ? t('hideFilters') : t('showFilters')}
                 onClick={() => setMobileFiltersOpen((open) => !open)}
               >
                 <span aria-hidden="true">{mobileFiltersOpen ? '−' : '+'}</span>
-                {mobileFiltersOpen ? t('hideFilters') : t('showFilters')}
+                <span className="mobile-filters-label">
+                  {mobileFiltersOpen ? t('hideFilters') : t('showFilters')}
+                </span>
               </button>
             </div>
 
