@@ -1426,7 +1426,9 @@ summary:focus-visible {
 
 @media (max-width: 700px) {
   .navbar {
-    position: relative;
+    position: sticky;
+    top: 0;
+    padding-top: env(safe-area-inset-top, 0px);
   }
 
   .nav-links {
