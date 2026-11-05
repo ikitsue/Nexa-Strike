@@ -22,7 +22,7 @@ const EasterEgg = () => {
 
     const loadSuggesters = async () => {
       try {
-        const names = new Map();
+        const contributors = new Map();
         const pageSize = 1000;
         let offset = 0;
         let page;
@@ -39,13 +39,21 @@ const EasterEgg = () => {
           page = data || [];
           for (const row of page) {
             const name = row.suggested_by?.trim();
-            if (name) names.set(name.toLocaleLowerCase(), name);
+            if (name) {
+              const key = name.toLocaleLowerCase();
+              const contributor = contributors.get(key);
+              if (contributor) {
+                contributor.count += 1;
+              } else {
+                contributors.set(key, { name, count: 1 });
+              }
+            }
           }
           offset += pageSize;
         } while (page.length === pageSize);
 
         if (!cancelled) {
-          setSuggesters([...names.values()].sort((a, b) => a.localeCompare(b, language)));
+          setSuggesters([...contributors.values()].sort((a, b) => a.name.localeCompare(b.name, language)));
           setSuggestersError(false);
         }
       } catch (error) {
@@ -191,7 +199,17 @@ const EasterEgg = () => {
             </p>
           ) : (
             <ul className="easter-egg__list">
-              {suggesters.map((name) => <li key={name}>{name}</li>)}
+              {suggesters.map(({ name, count }) => (
+                <li key={name}>
+                  <span>{name}</span>
+                  <span
+                    className="easter-egg__contributor-count"
+                    aria-label={t('easterEggContributionCount').replace('{count}', count.toLocaleString(language))}
+                  >
+                    × {count.toLocaleString(language)}
+                  </span>
+                </li>
+              ))}
             </ul>
           )}
           {realtimeError && (

@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(13);
+SELECT plan(16);
 
 INSERT INTO public.users (email, username, role)
 VALUES
@@ -42,6 +42,11 @@ WHERE title = 'Ticket owned by user';
 SELECT set_config(
   'nexastrike.ticket_test_ticket_id',
   (SELECT id::text FROM public.tickets WHERE title = 'Ticket owned by user'),
+  true
+);
+SELECT set_config(
+  'nexastrike.ticket_test_other_ticket_id',
+  (SELECT id::text FROM public.tickets WHERE title = 'Ticket owned by another user'),
   true
 );
 
@@ -105,6 +110,17 @@ SELECT throws_ok(
   NULL,
   'customers cannot forge staff replies'
 );
+SELECT throws_ok(
+  format(
+    'INSERT INTO public.ticket_messages (ticket_id, author_id, author_email, author_role, message) VALUES (%L, auth.uid(), auth.email(), %L, %L)',
+    current_setting('nexastrike.ticket_test_other_ticket_id'),
+    'customer',
+    'Reply to another user ticket'
+  ),
+  '42501',
+  NULL,
+  'ticket participants cannot reply to tickets they cannot access'
+);
 
 RESET ROLE;
 SET LOCAL ROLE authenticated;
@@ -129,6 +145,26 @@ SELECT is(
   (SELECT count(*) FROM public.ticket_messages),
   2::bigint,
   'administrators can read all conversation messages'
+);
+SELECT lives_ok(
+  format(
+    'INSERT INTO public.ticket_messages (ticket_id, author_id, author_email, author_role, message) VALUES (%L, auth.uid(), auth.email(), %L, %L)',
+    current_setting('nexastrike.ticket_test_ticket_id'),
+    'admin',
+    'Staff reply'
+  ),
+  'administrators can reply as staff'
+);
+SELECT throws_ok(
+  format(
+    'INSERT INTO public.ticket_messages (ticket_id, author_id, author_email, author_role, message) VALUES (%L, auth.uid(), auth.email(), %L, %L)',
+    current_setting('nexastrike.ticket_test_ticket_id'),
+    'customer',
+    'Admin reply as customer'
+  ),
+  '42501',
+  NULL,
+  'administrators cannot use the customer reply policy'
 );
 
 SELECT * FROM finish();

@@ -102,9 +102,13 @@ router.post('/admin/:id/unban', authMiddleware, adminMiddleware, validateId, han
 });
 
 // Get user by ID - MUST be after admin routes
-router.get('/:id', validateId, async (req, res) => {
+router.get('/:id', authMiddleware, validateId, async (req, res) => {
   try {
     const userId = req.params.id;
+    if (Number(userId) !== Number(req.user.userId)) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const result = await pool.query('SELECT id, email, username, steam_id, profile_picture, created_at FROM users WHERE id = $1', [userId]);
     
     if (result.rows.length === 0) {

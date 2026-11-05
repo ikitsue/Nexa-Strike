@@ -170,6 +170,10 @@ button.easter-egg__badge {
 }
 
 .easter-egg__list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   min-width: 0;
   padding: 0.8rem 1rem;
   overflow-wrap: anywhere;
@@ -180,8 +184,19 @@ button.easter-egg__badge {
   border: 1px solid var(--border);
   border-radius: 10px;
   font-weight: 600;
-  text-align: center;
+  text-align: left;
   transition: border-color 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
+}
+
+.easter-egg__contributor-count {
+  flex-shrink: 0;
+  padding: 0.2rem 0.55rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 750;
+  white-space: nowrap;
 }
 
 .easter-egg__list li:hover {
