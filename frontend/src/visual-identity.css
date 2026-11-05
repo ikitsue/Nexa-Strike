@@ -19,7 +19,7 @@
 }
 
 :root[data-theme='light'] {
-  color-scheme: light;
+  color-scheme: only light;
   --bg: #f3f0eb;
   --bg-secondary: #e9e4dd;
   --surface: #fffdfa;
