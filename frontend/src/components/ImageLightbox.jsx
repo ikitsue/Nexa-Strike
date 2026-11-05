@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './ImageLightbox.css';
 
-const MAX_ZOOM = 3;
+const MAX_ZOOM = 2.5;
 
 const ImageLightbox = ({
   src,
@@ -24,13 +24,48 @@ const ImageLightbox = ({
   const closeButtonRef = useRef(null);
   const lightboxRef = useRef(null);
   const imageRef = useRef(null);
+  const zoomPercentRef = useRef(null);
   const dragRef = useRef(null);
   const activePointersRef = useRef(new Map());
   const pinchRef = useRef(null);
+  const zoomRef = useRef(zoom);
+  const pendingZoomRef = useRef(zoom);
+  const zoomFrameRef = useRef(null);
+
+  const writeZoomTransform = (nextZoom) => {
+    if (imageRef.current) {
+      imageRef.current.style.transform = `translate3d(${nextZoom.x}px, ${nextZoom.y}px, 0) scale(${nextZoom.scale})`;
+    }
+    if (zoomPercentRef.current) {
+      zoomPercentRef.current.textContent = `${Math.round(nextZoom.scale * 100)}%`;
+    }
+  };
+
+  const commitZoom = (nextZoom) => {
+    if (zoomFrameRef.current !== null) {
+      cancelAnimationFrame(zoomFrameRef.current);
+      zoomFrameRef.current = null;
+    }
+    zoomRef.current = nextZoom;
+    pendingZoomRef.current = nextZoom;
+    setZoom(nextZoom);
+    writeZoomTransform(nextZoom);
+  };
+
+  const applyGestureZoom = (nextZoom) => {
+    pendingZoomRef.current = nextZoom;
+    if (zoomFrameRef.current !== null) return;
+
+    zoomFrameRef.current = requestAnimationFrame(() => {
+      zoomFrameRef.current = null;
+      zoomRef.current = pendingZoomRef.current;
+      writeZoomTransform(zoomRef.current);
+    });
+  };
 
   useEffect(() => {
     setImageSrc(src);
-    setZoom({ scale: 1, x: 0, y: 0 });
+    commitZoom({ scale: 1, x: 0, y: 0 });
   }, [src]);
 
   useEffect(() => {
@@ -78,25 +113,26 @@ const ImageLightbox = ({
     const scale = Math.min(MAX_ZOOM, Math.max(1, nextScale));
 
     if (scale === 1) {
-      setZoom({ scale: 1, x: 0, y: 0 });
+      commitZoom({ scale: 1, x: 0, y: 0 });
       return;
     }
 
     const rect = imageRef.current?.getBoundingClientRect();
-    const ratio = scale / zoom.scale;
+    const currentZoom = zoomRef.current;
+    const ratio = scale / currentZoom.scale;
     const pointerX = pointer ? pointer.x - (rect.left + rect.width / 2) : 0;
     const pointerY = pointer ? pointer.y - (rect.top + rect.height / 2) : 0;
 
-    setZoom(clampZoom({
+    commitZoom(clampZoom({
       scale,
-      x: zoom.x + pointerX * (1 - ratio),
-      y: zoom.y + pointerY * (1 - ratio),
+      x: currentZoom.x + pointerX * (1 - ratio),
+      y: currentZoom.y + pointerY * (1 - ratio),
     }));
   };
 
   const handleWheel = (event) => {
     event.preventDefault();
-    setScale(zoom.scale * (event.deltaY < 0 ? 1.2 : 1 / 1.2), {
+    setScale(zoomRef.current.scale * (event.deltaY < 0 ? 1.2 : 1 / 1.2), {
       x: event.clientX,
       y: event.clientY,
     });
@@ -115,35 +151,35 @@ const ImageLightbox = ({
           distance: Math.hypot(second.x - first.x, second.y - first.y),
           midpointX: (first.x + second.x) / 2,
           midpointY: (first.y + second.y) / 2,
-          scale: zoom.scale,
-          x: zoom.x,
-          y: zoom.y,
-          centerX: rect.left + rect.width / 2 - zoom.x,
-          centerY: rect.top + rect.height / 2 - zoom.y,
+          scale: zoomRef.current.scale,
+          x: zoomRef.current.x,
+          y: zoomRef.current.y,
+          centerX: rect.left + rect.width / 2 - zoomRef.current.x,
+          centerY: rect.top + rect.height / 2 - zoomRef.current.y,
         };
         dragRef.current = null;
         return;
       }
 
-      if (zoom.scale > 1) {
+      if (zoomRef.current.scale > 1) {
         dragRef.current = {
           pointerId: event.pointerId,
           x: event.clientX,
           y: event.clientY,
-          zoomX: zoom.x,
-          zoomY: zoom.y,
+          zoomX: zoomRef.current.x,
+          zoomY: zoomRef.current.y,
         };
       }
       return;
     }
 
-    if (zoom.scale === 1 || event.button !== 0) return;
+    if (zoomRef.current.scale === 1 || event.button !== 0) return;
     dragRef.current = {
       pointerId: event.pointerId,
       x: event.clientX,
       y: event.clientY,
-      zoomX: zoom.x,
-      zoomY: zoom.y,
+      zoomX: zoomRef.current.x,
+      zoomY: zoomRef.current.y,
     };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
@@ -163,7 +199,7 @@ const ImageLightbox = ({
         const pointX = (pinch.midpointX - pinch.centerX - pinch.x) / pinch.scale;
         const pointY = (pinch.midpointY - pinch.centerY - pinch.y) / pinch.scale;
 
-        setZoom(clampZoom(scale === 1 ? { scale: 1, x: 0, y: 0 } : {
+        applyGestureZoom(clampZoom(scale === 1 ? { scale: 1, x: 0, y: 0 } : {
           scale,
           x: midpointX - pinch.centerX - pointX * scale,
           y: midpointY - pinch.centerY - pointY * scale,
@@ -174,8 +210,8 @@ const ImageLightbox = ({
 
     if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
 
-    setZoom((current) => clampZoom({
-      ...current,
+    applyGestureZoom(clampZoom({
+      ...zoomRef.current,
       x: dragRef.current.zoomX + event.clientX - dragRef.current.x,
       y: dragRef.current.zoomY + event.clientY - dragRef.current.y,
     }));
@@ -183,25 +219,37 @@ const ImageLightbox = ({
 
   const handlePointerUp = (event) => {
     const wasPinching = Boolean(pinchRef.current);
+    if (wasPinching) {
+      if (zoomFrameRef.current !== null) {
+        cancelAnimationFrame(zoomFrameRef.current);
+        zoomFrameRef.current = null;
+      }
+      zoomRef.current = pendingZoomRef.current;
+      writeZoomTransform(zoomRef.current);
+    }
+
     if (activePointersRef.current.has(event.pointerId)) {
       activePointersRef.current.delete(event.pointerId);
       if (wasPinching) pinchRef.current = null;
 
       const remainingPointers = [...activePointersRef.current.entries()];
-      if (remainingPointers.length === 1 && zoom.scale > 1) {
+      if (remainingPointers.length === 1 && zoomRef.current.scale > 1) {
         const [pointerId, pointer] = remainingPointers[0];
         dragRef.current = {
           pointerId,
           x: pointer.x,
           y: pointer.y,
-          zoomX: zoom.x,
-          zoomY: zoom.y,
+          zoomX: zoomRef.current.x,
+          zoomY: zoomRef.current.y,
         };
         return;
       }
     }
 
-    if (dragRef.current?.pointerId === event.pointerId || wasPinching) dragRef.current = null;
+    if (dragRef.current?.pointerId === event.pointerId || wasPinching) {
+      dragRef.current = null;
+      commitZoom(pendingZoomRef.current);
+    }
   };
 
   return (
@@ -213,7 +261,7 @@ const ImageLightbox = ({
         aria-label={`${openLabel}: ${alt}`}
         title={openLabel}
         onClick={() => {
-          setZoom({ scale: 1, x: 0, y: 0 });
+          commitZoom({ scale: 1, x: 0, y: 0 });
           setIsOpen(true);
         }}
       >
@@ -284,11 +332,11 @@ const ImageLightbox = ({
             <button type="button" aria-label={zoomOutLabel} disabled={zoom.scale === 1} onClick={() => setScale(zoom.scale / 1.2)}>
               &minus;
             </button>
-            <span>{Math.round(zoom.scale * 100)}%</span>
+            <span ref={zoomPercentRef}>{Math.round(zoom.scale * 100)}%</span>
             <button type="button" aria-label={zoomInLabel} disabled={zoom.scale === MAX_ZOOM} onClick={() => setScale(zoom.scale * 1.2)}>
               +
             </button>
-            <button type="button" aria-label={resetZoomLabel} disabled={zoom.scale === 1} onClick={() => setZoom({ scale: 1, x: 0, y: 0 })}>
+            <button type="button" aria-label={resetZoomLabel} disabled={zoom.scale === 1} onClick={() => commitZoom({ scale: 1, x: 0, y: 0 })}>
               1:1
             </button>
           </div>
