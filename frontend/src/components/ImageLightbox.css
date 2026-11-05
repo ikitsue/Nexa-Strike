@@ -70,6 +70,7 @@
 
 .image-lightbox__close {
   position: absolute;
+  z-index: 1;
   top: 1rem;
   right: 1rem;
   display: grid;
@@ -98,6 +99,7 @@
 
 .image-lightbox__zoom-controls {
   position: absolute;
+  z-index: 1;
   bottom: 1rem;
   left: 50%;
   display: flex;
