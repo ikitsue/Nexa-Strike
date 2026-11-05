@@ -20,11 +20,13 @@ const ImageLightbox = ({
   const [isOpen, setIsOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
   const [zoom, setZoom] = useState({ scale: 1, x: 0, y: 0 });
+  const [imageLayout, setImageLayout] = useState(null);
   const triggerRef = useRef(null);
   const closeButtonRef = useRef(null);
-  const lightboxRef = useRef(null);
+  const viewportRef = useRef(null);
   const imageRef = useRef(null);
   const zoomPercentRef = useRef(null);
+  const imageLayoutRef = useRef(null);
   const dragRef = useRef(null);
   const activePointersRef = useRef(new Map());
   const pinchRef = useRef(null);
@@ -33,8 +35,14 @@ const ImageLightbox = ({
   const zoomFrameRef = useRef(null);
 
   const writeZoomTransform = (nextZoom) => {
-    if (imageRef.current) {
-      imageRef.current.style.transform = `translate3d(${nextZoom.x}px, ${nextZoom.y}px, 0) scale(${nextZoom.scale})`;
+    const image = imageRef.current;
+    const viewport = viewportRef.current;
+    const layout = imageLayoutRef.current;
+    if (image && viewport && layout) {
+      image.style.width = `${layout.width * nextZoom.scale}px`;
+      image.style.height = `${layout.height * nextZoom.scale}px`;
+      image.style.left = `${(viewport.clientWidth - layout.width * nextZoom.scale) / 2 + nextZoom.x}px`;
+      image.style.top = `${(viewport.clientHeight - layout.height * nextZoom.scale) / 2 + nextZoom.y}px`;
     }
     if (zoomPercentRef.current) {
       zoomPercentRef.current.textContent = `${Math.round(nextZoom.scale * 100)}%`;
@@ -63,8 +71,30 @@ const ImageLightbox = ({
     });
   };
 
+  const measureImage = () => {
+    const image = imageRef.current;
+    const viewport = viewportRef.current;
+    if (!image?.naturalWidth || !viewport) return;
+
+    const fitScale = Math.min(
+      viewport.clientWidth / image.naturalWidth,
+      viewport.clientHeight / image.naturalHeight,
+      1600 / image.naturalWidth,
+      1,
+    );
+    const layout = {
+      width: image.naturalWidth * fitScale,
+      height: image.naturalHeight * fitScale,
+    };
+    imageLayoutRef.current = layout;
+    setImageLayout(layout);
+    commitZoom({ scale: 1, x: 0, y: 0 });
+  };
+
   useEffect(() => {
     setImageSrc(src);
+    imageLayoutRef.current = null;
+    setImageLayout(null);
     commitZoom({ scale: 1, x: 0, y: 0 });
   }, [src]);
 
@@ -79,10 +109,13 @@ const ImageLightbox = ({
     document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', closeOnEscape);
     closeButtonRef.current?.focus();
+    measureImage();
+    window.addEventListener('resize', measureImage);
 
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', closeOnEscape);
+      window.removeEventListener('resize', measureImage);
       triggerRef.current?.focus();
     };
   }, [isOpen]);
@@ -96,12 +129,12 @@ const ImageLightbox = ({
   const clampZoom = (nextZoom) => {
     if (nextZoom.scale <= 1) return { scale: 1, x: 0, y: 0 };
 
-    const image = imageRef.current;
-    const lightbox = lightboxRef.current;
-    if (!image || !lightbox) return nextZoom;
+    const viewport = viewportRef.current;
+    const layout = imageLayoutRef.current;
+    if (!viewport || !layout) return nextZoom;
 
-    const maxX = Math.max(0, (image.offsetWidth * nextZoom.scale - (lightbox.clientWidth - 32)) / 2);
-    const maxY = Math.max(0, (image.offsetHeight * nextZoom.scale - (lightbox.clientHeight - 64)) / 2);
+    const maxX = Math.max(0, (layout.width * nextZoom.scale - viewport.clientWidth) / 2);
+    const maxY = Math.max(0, (layout.height * nextZoom.scale - viewport.clientHeight) / 2);
     return {
       ...nextZoom,
       x: Math.min(maxX, Math.max(-maxX, nextZoom.x)),
@@ -146,7 +179,7 @@ const ImageLightbox = ({
       const touchPointers = [...activePointersRef.current.values()];
       if (touchPointers.length >= 2) {
         const [first, second] = touchPointers;
-        const rect = imageRef.current.getBoundingClientRect();
+        const rect = viewportRef.current.getBoundingClientRect();
         pinchRef.current = {
           distance: Math.hypot(second.x - first.x, second.y - first.y),
           midpointX: (first.x + second.x) / 2,
@@ -154,8 +187,8 @@ const ImageLightbox = ({
           scale: zoomRef.current.scale,
           x: zoomRef.current.x,
           y: zoomRef.current.y,
-          centerX: rect.left + rect.width / 2 - zoomRef.current.x,
-          centerY: rect.top + rect.height / 2 - zoomRef.current.y,
+          centerX: rect.left + rect.width / 2,
+          centerY: rect.top + rect.height / 2,
         };
         dragRef.current = null;
         return;
@@ -274,7 +307,6 @@ const ImageLightbox = ({
       </button>
       {isOpen && createPortal(
         <div
-          ref={lightboxRef}
           className="image-lightbox"
           role="dialog"
           aria-modal="true"
@@ -307,20 +339,29 @@ const ImageLightbox = ({
           >
             <span aria-hidden="true">&times;</span>
           </button>
-          <img
-            ref={imageRef}
-            className={`image-lightbox__image${zoom.scale > 1 ? ' is-zoomed' : ''}`}
-            src={imageSrc}
-            alt={alt}
-            draggable={false}
-            style={{ transform: `translate3d(${zoom.x}px, ${zoom.y}px, 0) scale(${zoom.scale})` }}
+          <div
+            ref={viewportRef}
+            className="image-lightbox__viewport"
             onWheel={handleWheel}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-            onError={handleImageError}
-          />
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setIsOpen(false);
+            }}
+          >
+            <img
+              ref={imageRef}
+              className={`image-lightbox__image${zoom.scale > 1 ? ' is-zoomed' : ''}`}
+              src={imageSrc}
+              alt={alt}
+              draggable={false}
+              style={{ width: imageLayout?.width, height: imageLayout?.height }}
+              onLoad={measureImage}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+              onError={handleImageError}
+            />
+          </div>
           <div className="image-lightbox__zoom-controls" aria-label={zoomControlsLabel}>
             <button type="button" aria-label={zoomOutLabel} disabled={zoom.scale === 1} onClick={() => setScale(zoom.scale / 1.2)}>
               &minus;

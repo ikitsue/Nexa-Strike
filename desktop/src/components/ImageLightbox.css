@@ -51,12 +51,22 @@
   cursor: zoom-out;
 }
 
-.image-lightbox__image {
-  display: block;
-  max-width: min(96vw, 1600px);
-  max-height: 92vh;
-  object-fit: contain;
+.image-lightbox__viewport {
+  position: absolute;
+  inset: 3rem 1rem 4rem;
+  overflow: hidden;
   touch-action: none;
+}
+
+.image-lightbox__image {
+  position: absolute;
+  display: block;
+  max-width: none;
+  max-height: none;
+  object-fit: fill;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-drag: none;
   cursor: zoom-in;
 }
 
