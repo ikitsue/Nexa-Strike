@@ -123,6 +123,7 @@ const MapDetail = () => {
   const loadedPreferencesMapId = useRef(id);
   const skipPreferenceSave = useRef(false);
   const zoomContainerRef = useRef(null);
+  const mapStageInnerRef = useRef(null);
   const zoomRef = useRef(100);
   const panRef = useRef({ x: 0, y: 0 });
   const isMapHoverRef = useRef(false);
@@ -303,6 +304,11 @@ const MapDetail = () => {
     setPanY(nextPanY);
   };
 
+  const applyMapTransform = (nextZoom, nextPan) => {
+    if (!mapStageInnerRef.current) return;
+    mapStageInnerRef.current.style.transform = `rotate(${rotation}deg) scale(${nextZoom / 100}) translate(${nextPan.x}px, ${nextPan.y}px)`;
+  };
+
   useEffect(() => {
     const handlePointerMove = (e) => {
       const pointer = activePointersRef.current.get(e.pointerId);
@@ -334,9 +340,7 @@ const MapDetail = () => {
 
           zoomRef.current = nextZoom;
           panRef.current = { x: nextPanX, y: nextPanY };
-          setZoom(nextZoom);
-          setPanX(nextPanX);
-          setPanY(nextPanY);
+          applyMapTransform(nextZoom, panRef.current);
           didDragMapRef.current = true;
         }
         return;
@@ -355,9 +359,8 @@ const MapDetail = () => {
 
       const nextPanX = e.clientX - dragStart.x;
       const nextPanY = e.clientY - dragStart.y;
-      setPanX(nextPanX);
-      setPanY(nextPanY);
       panRef.current = { x: nextPanX, y: nextPanY };
+      applyMapTransform(zoomRef.current, panRef.current);
     };
 
     const handlePointerEnd = (e) => {
@@ -369,6 +372,9 @@ const MapDetail = () => {
 
       if (pinchStartRef.current) {
         pinchStartRef.current = null;
+        setZoom(zoomRef.current);
+        setPanX(panRef.current.x);
+        setPanY(panRef.current.y);
         if (touchPointers.length === 1) {
           const [pointerId, pointer] = touchPointers[0];
           dragPointerIdRef.current = pointerId;
@@ -381,6 +387,8 @@ const MapDetail = () => {
 
       if (e.pointerId === dragPointerIdRef.current) {
         dragPointerIdRef.current = null;
+        setPanX(panRef.current.x);
+        setPanY(panRef.current.y);
         setIsDragging(false);
       }
     };
@@ -393,7 +401,7 @@ const MapDetail = () => {
       window.removeEventListener('pointerup', handlePointerEnd);
       window.removeEventListener('pointercancel', handlePointerEnd);
     };
-  }, [dragStart]);
+  }, [dragStart, rotation]);
 
   useEffect(() => {
     const handleGlobalWheel = (e) => {
@@ -698,7 +706,10 @@ const MapDetail = () => {
         };
       }
       dragPointerIdRef.current = null;
-      setIsDragging(false);
+      setIsDragging(true);
+      if (mapStageInnerRef.current) {
+        mapStageInnerRef.current.style.transition = 'none';
+      }
       return;
     }
 
@@ -935,6 +946,7 @@ const MapDetail = () => {
               <div className="map-stage-layer">
                 <div
                   className="map-stage-inner"
+                  ref={mapStageInnerRef}
                   onClick={() => {
                     if (didDragMapRef.current) {
                       didDragMapRef.current = false;
