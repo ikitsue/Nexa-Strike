@@ -791,6 +791,7 @@
   .map-detail .line-group-child-dot {
     width: 16px;
     height: 16px;
+    box-sizing: border-box;
   }
 
   .mobile-filters-toggle {
