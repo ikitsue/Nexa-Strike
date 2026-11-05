@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './ImageLightbox.css';
 
+const MAX_ZOOM = 3;
+
 const ImageLightbox = ({
   src,
   fallbackSrc,
@@ -20,6 +22,7 @@ const ImageLightbox = ({
   const [zoom, setZoom] = useState({ scale: 1, x: 0, y: 0 });
   const triggerRef = useRef(null);
   const closeButtonRef = useRef(null);
+  const lightboxRef = useRef(null);
   const imageRef = useRef(null);
   const dragRef = useRef(null);
   const activePointersRef = useRef(new Map());
@@ -55,8 +58,24 @@ const ImageLightbox = ({
     }
   };
 
+  const clampZoom = (nextZoom) => {
+    if (nextZoom.scale <= 1) return { scale: 1, x: 0, y: 0 };
+
+    const image = imageRef.current;
+    const lightbox = lightboxRef.current;
+    if (!image || !lightbox) return nextZoom;
+
+    const maxX = Math.max(0, (image.offsetWidth * nextZoom.scale - (lightbox.clientWidth - 32)) / 2);
+    const maxY = Math.max(0, (image.offsetHeight * nextZoom.scale - (lightbox.clientHeight - 64)) / 2);
+    return {
+      ...nextZoom,
+      x: Math.min(maxX, Math.max(-maxX, nextZoom.x)),
+      y: Math.min(maxY, Math.max(-maxY, nextZoom.y)),
+    };
+  };
+
   const setScale = (nextScale, pointer) => {
-    const scale = Math.min(5, Math.max(1, nextScale));
+    const scale = Math.min(MAX_ZOOM, Math.max(1, nextScale));
 
     if (scale === 1) {
       setZoom({ scale: 1, x: 0, y: 0 });
@@ -68,11 +87,11 @@ const ImageLightbox = ({
     const pointerX = pointer ? pointer.x - (rect.left + rect.width / 2) : 0;
     const pointerY = pointer ? pointer.y - (rect.top + rect.height / 2) : 0;
 
-    setZoom({
+    setZoom(clampZoom({
       scale,
       x: zoom.x + pointerX * (1 - ratio),
       y: zoom.y + pointerY * (1 - ratio),
-    });
+    }));
   };
 
   const handleWheel = (event) => {
@@ -140,22 +159,22 @@ const ImageLightbox = ({
         const distance = Math.hypot(second.x - first.x, second.y - first.y);
         const midpointX = (first.x + second.x) / 2;
         const midpointY = (first.y + second.y) / 2;
-        const scale = Math.min(5, Math.max(1, pinch.scale * (distance / pinch.distance)));
+        const scale = Math.min(MAX_ZOOM, Math.max(1, pinch.scale * (distance / pinch.distance)));
         const pointX = (pinch.midpointX - pinch.centerX - pinch.x) / pinch.scale;
         const pointY = (pinch.midpointY - pinch.centerY - pinch.y) / pinch.scale;
 
-        setZoom(scale === 1 ? { scale: 1, x: 0, y: 0 } : {
+        setZoom(clampZoom(scale === 1 ? { scale: 1, x: 0, y: 0 } : {
           scale,
           x: midpointX - pinch.centerX - pointX * scale,
           y: midpointY - pinch.centerY - pointY * scale,
-        });
+        }));
         return;
       }
     }
 
     if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
 
-    setZoom((current) => ({
+    setZoom((current) => clampZoom({
       ...current,
       x: dragRef.current.zoomX + event.clientX - dragRef.current.x,
       y: dragRef.current.zoomY + event.clientY - dragRef.current.y,
@@ -207,6 +226,7 @@ const ImageLightbox = ({
       </button>
       {isOpen && createPortal(
         <div
+          ref={lightboxRef}
           className="image-lightbox"
           role="dialog"
           aria-modal="true"
@@ -258,7 +278,7 @@ const ImageLightbox = ({
               &minus;
             </button>
             <span>{Math.round(zoom.scale * 100)}%</span>
-            <button type="button" aria-label={zoomInLabel} disabled={zoom.scale === 5} onClick={() => setScale(zoom.scale * 1.2)}>
+            <button type="button" aria-label={zoomInLabel} disabled={zoom.scale === MAX_ZOOM} onClick={() => setScale(zoom.scale * 1.2)}>
               +
             </button>
             <button type="button" aria-label={resetZoomLabel} disabled={zoom.scale === 1} onClick={() => setZoom({ scale: 1, x: 0, y: 0 })}>
