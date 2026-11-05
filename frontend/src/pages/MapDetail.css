@@ -782,6 +782,11 @@
     min-height: 420px;
   }
 
+  .map-detail .marker-icon {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
   .mobile-filters-toggle {
     display: inline-flex;
     align-items: center;
