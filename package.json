@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ikitsue/cs2-utility-web-site.git"
+    "url": "git+https://github.com/ikitsue/Nexa-Strike.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/ikitsue/cs2-utility-web-site/issues"
+    "url": "https://github.com/ikitsue/Nexa-Strike/issues"
   },
-  "homepage": "https://github.com/ikitsue/cs2-utility-web-site#readme",
+  "homepage": "https://github.com/ikitsue/Nexa-Strike#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
     "pg": "^8.21.0"

@@ -18,7 +18,7 @@ const Credits = () => {
               <h3>{t('leadDeveloper')}</h3>
               <p className="credit-name">ikitsue</p>
               <p className="credit-role">{t('fullStack')}</p>
-              <a href="https://github.com/ikitsue" target="_blank" rel="noopener noreferrer">{t('github')}</a>
+              <a href="https://github.com/ikitsue/Nexa-Strike" target="_blank" rel="noopener noreferrer">{t('github')}</a>
             </div>
           </div>
         </section>

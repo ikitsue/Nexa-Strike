@@ -18,7 +18,7 @@ const Credits = () => {
               <h3>{t('leadDeveloper')}</h3>
               <p className="credit-name">ikitsue</p>
               <p className="credit-role">{t('fullStack')}</p>
-              <a href="https://github.com/ikitsue" target="_blank" rel="noopener noreferrer">{t('github')}</a>
+              <a href="https://github.com/ikitsue/Nexa-Strike" target="_blank" rel="noopener noreferrer">{t('github')}</a>
             </div>
           </div>
         </section>
@@ -66,7 +66,7 @@ const Credits = () => {
             <strong>{t('license')}:</strong> ISC
           </p>
           <p className="source-code">
-            <strong>{t('sourceCode')}:</strong> <a href="https://github.com/ikitsue/cs2-utility-web-site" target="_blank" rel="noopener noreferrer">{t('github')}</a>
+            <strong>{t('sourceCode')}:</strong> <a href="https://github.com/ikitsue/Nexa-Strike" target="_blank" rel="noopener noreferrer">{t('github')}</a>
           </p>
         </section>
 

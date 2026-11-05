@@ -60,7 +60,7 @@ const Footer = () => {
             <li><Link to="/maps">{t('maps')}</Link></li>
             <li><Link to="/suggestions">{t('suggestions')}</Link></li>
             <li><Link to="/download">{t('download')}</Link></li>
-            <li><a href="https://github.com/ikitsue" target="_blank" rel="noopener noreferrer">{t('github')}</a></li>
+            <li><a href="https://github.com/ikitsue/Nexa-Strike" target="_blank" rel="noopener noreferrer">{t('github')}</a></li>
           </ul>
         </div>
 
@@ -116,7 +116,7 @@ const Footer = () => {
               <span aria-hidden="true">🍪</span>
               {t('footerCookieEgg')}
             </button>
-            <a href="https://github.com/ikitsue" target="_blank" rel="noopener noreferrer" aria-label={t('github')}>
+            <a href="https://github.com/ikitsue/Nexa-Strike" target="_blank" rel="noopener noreferrer" aria-label={t('github')}>
               <i className="fab fa-github" aria-hidden="true"></i> {t('github')}
             </a>
             <details className="footer-contact-menu">
