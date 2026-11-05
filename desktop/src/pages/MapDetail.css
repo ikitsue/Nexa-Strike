@@ -794,6 +794,24 @@
     box-sizing: border-box;
   }
 
+  .map-detail .map-marker.line .line-group-dot {
+    width: 8px;
+    height: 8px;
+    border-width: 0.75px;
+    box-shadow: none;
+  }
+
+  .map-detail .map-marker.line {
+    border: none !important;
+  }
+
+  .map-detail .map-marker.line-group-child .line-group-child-dot {
+    width: 8px;
+    height: 8px;
+    border-width: 0.75px;
+    box-shadow: none;
+  }
+
   .mobile-filters-toggle {
     display: inline-flex;
     align-items: center;
