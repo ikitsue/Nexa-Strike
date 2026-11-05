@@ -39,6 +39,25 @@
   color: #000;
 }
 
+.admin-panel .filter-buttons .filter-btn {
+  background: linear-gradient(135deg, #211a15, #171514);
+  border: 1px solid rgba(255, 145, 66, 0.3);
+  color: #e8e0d7;
+}
+
+.admin-panel .filter-buttons .filter-btn:hover {
+  background: linear-gradient(135deg, #3a2417, #241910);
+  border-color: #ff9a45;
+  color: #ffb476;
+}
+
+.admin-panel .filter-buttons .filter-btn.active {
+  background: linear-gradient(135deg, #ff9a45, #f06418);
+  border-color: #ff9a45;
+  box-shadow: 0 3px 10px rgba(240, 100, 24, 0.2);
+  color: #1d1008;
+}
+
 .empty-state {
   text-align: center;
   padding: 3rem 2rem;
@@ -331,12 +350,14 @@
 }
 
 .btn-ban {
-  background-color: #f44336;
-  color: white;
+  background: linear-gradient(135deg, #ff9a45, #f06418);
+  box-shadow: 0 3px 9px rgba(240, 100, 24, 0.22);
+  color: #1d1008;
 }
 
 .btn-ban:hover {
-  background-color: #da190b;
+  background: linear-gradient(135deg, #ffad63, #ff7626);
+  box-shadow: 0 4px 12px rgba(240, 100, 24, 0.3);
   transform: translateY(-2px);
 }
 
@@ -450,17 +471,23 @@
   }
 
   .filter-buttons {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
   }
 
   .filter-btn {
-    width: 100%;
+    min-width: 0;
+    padding: 0.65rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    line-height: 1.2;
   }
 
   .users-header,
   .user-row {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
   }
 
   .users-header {
@@ -468,10 +495,22 @@
   }
 
   .user-row {
-    background-color: #242d4a;
-    border: 1px solid #333;
-    border-radius: 4px;
-    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #25211e 0%, #1b1a19 58%, #24180f 100%);
+    border: 1px solid rgba(255, 145, 66, 0.2);
+    border-radius: 9px;
+    grid-template-areas:
+      "name name"
+      "email email"
+      "role status"
+      "created actions";
+    margin-bottom: 0.65rem;
+    padding: 0.7rem 0.8rem;
+    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.16);
+  }
+
+  .role-badge.user {
+    background: linear-gradient(135deg, #ffb15e, #ff741e);
+    color: #241307;
   }
 
   .user-col-name,
@@ -481,42 +520,142 @@
   .user-col-status,
   .user-col-actions {
     display: block;
+    min-width: 0;
+  }
+
+  .user-col-name,
+  .user-col-email {
+    grid-column: 1 / -1;
+    padding: 0.1rem 0;
+  }
+
+  .user-col-name {
+    grid-area: name;
+  }
+
+  .user-col-email {
+    grid-area: email;
+  }
+
+  .user-col-name::before,
+  .user-col-email::before,
+  .user-col-role::before,
+  .user-col-created::before,
+  .user-col-status::before {
+    color: #888;
+    display: inline;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    margin: 0 0.3rem 0 0;
+    text-transform: none;
   }
 
   .user-col-name::before {
     content: 'Username: ';
-    color: #888;
-    font-size: 0.8rem;
   }
 
   .user-col-email::before {
     content: 'Email: ';
-    color: #888;
-    font-size: 0.8rem;
   }
 
   .user-col-role::before {
     content: 'Role: ';
-    color: #888;
-    font-size: 0.8rem;
   }
 
   .user-col-created::before {
     content: 'Created: ';
-    color: #888;
-    font-size: 0.8rem;
   }
 
   .user-col-status::before {
     content: 'Status: ';
+  }
+
+  .user-col-name::before,
+  .user-col-email::before,
+  .user-col-role::before,
+  .user-col-created::before,
+  .user-col-status::before {
     color: #888;
-    font-size: 0.8rem;
   }
 
   .user-col-actions::before {
-    content: 'Actions: ';
-    color: #888;
-    font-size: 0.8rem;
+    content: none;
+  }
+
+  .user-col-name strong {
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+  }
+
+  .user-col-email {
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .user-col-role,
+  .user-col-status,
+  .user-col-created {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    justify-content: center;
+    padding: 0.15rem 0;
+    font-size: 0.76rem;
+  }
+
+  .user-col-role {
+    align-items: center;
+    flex-direction: row;
+    gap: 0;
+    grid-column: 1;
+    grid-area: role;
+    padding: 0.15rem 0;
+  }
+
+  .user-col-status {
+    align-items: center;
+    flex-direction: row;
+    gap: 0;
+    grid-column: 2;
+    grid-area: status;
+    padding: 0.15rem 0;
+  }
+
+  .user-col-created {
+    grid-column: 1;
+    grid-area: created;
+  }
+
+  .user-col-actions {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    grid-column: 2;
+    grid-area: actions;
+    justify-content: center;
+  }
+
+  .btn-ban,
+  .btn-unban {
+    border-radius: 6px;
+    align-self: flex-end;
+    min-height: 30px;
+    padding: 0.25rem 0.45rem;
+    width: auto;
+  }
+
+  .btn-ban {
+    background: linear-gradient(135deg, #ff9a45, #f06418);
+    box-shadow: 0 3px 9px rgba(240, 100, 24, 0.22);
+    color: #1d1008;
+  }
+
+  .btn-ban:hover {
+    background: linear-gradient(135deg, #ffad63, #ff7626);
+    box-shadow: 0 4px 12px rgba(240, 100, 24, 0.3);
   }
 
   .ban-input-section {
@@ -632,14 +771,13 @@
   }
 
   .user-row {
-    padding: 0.8rem;
+    padding: 0.65rem 0.75rem;
     margin-bottom: 0.8rem;
-    border-radius: 3px;
+    border-radius: 9px;
   }
 
-  .user-col-name strong,
   .user-col-email {
-    font-size: 0.85rem;
+    font-size: 0.76rem;
   }
 
   .role-badge {
@@ -649,8 +787,8 @@
 
   .btn-ban,
   .btn-unban {
-    padding: 0.4rem 0.7rem;
-    font-size: 0.75rem;
+    padding: 0.25rem 0.45rem;
+    font-size: 0.7rem;
   }
 
   .ban-input-section {
