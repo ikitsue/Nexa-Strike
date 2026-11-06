@@ -5,8 +5,7 @@ export const legalCopy = {
       {
         heading: 'Responsable du traitement',
         paragraphs: [
-          'NexaStrike est le nom du service. L’identité juridique et les coordonnées de la personne ou de l’entité qui détermine les finalités et moyens des traitements doivent être renseignées par l’éditeur avant publication : [IDENTITÉ ET ADRESSE DU RESPONSABLE À COMPLÉTER].',
-          'L’adresse ikitsue.contact@gmail.com est affichée dans le pied de page du site ; son fonctionnement et son responsable doivent être confirmés par l’éditeur.',
+          'NexaStrike est un service exploité à titre individuel par ikitsue, son créateur indépendant, sans société. ikitsue est le responsable du traitement. Aucune adresse postale personnelle n’est publiée. Contact : ikitsue.contact@gmail.com.',
         ],
       },
       {
@@ -39,7 +38,7 @@ export const legalCopy = {
       {
         heading: 'Vos droits et contact',
         paragraphs: [
-          'Selon les conditions prévues par le RGPD, vous pouvez demander l’accès, la rectification, l’effacement, la limitation, la portabilité ou vous opposer à certains traitements ; vous pouvez retirer un consentement à tout moment pour l’avenir. Contactez le responsable à l’adresse publiée sur le site, après confirmation par l’éditeur. Vous pouvez également introduire une réclamation auprès de la CNIL (cnil.fr).',
+          'Selon les conditions prévues par le RGPD, vous pouvez demander l’accès, la rectification, l’effacement, la limitation, la portabilité ou vous opposer à certains traitements ; vous pouvez retirer un consentement à tout moment pour l’avenir. Pour exercer vos droits, contactez ikitsue à l’adresse ikitsue.contact@gmail.com. Vous pouvez également introduire une réclamation auprès de la CNIL (cnil.fr).',
           'Le site ne comporte pas de fonctionnalité d’IA générative identifiée dans le code audité. Les contenus rédigés par les utilisateurs peuvent naturellement mentionner des outils d’IA.',
         ],
       },
@@ -57,8 +56,7 @@ export const legalCopy = {
       {
         heading: 'Controller',
         paragraphs: [
-          'NexaStrike is the service name. The legal identity and contact details of the person or entity determining the purposes and means of processing must be completed by the publisher before publication: [CONTROLLER IDENTITY AND ADDRESS TO BE COMPLETED].',
-          'The site footer displays ikitsue.contact@gmail.com; the publisher must confirm that this address is operational and identify who controls it.',
+          'NexaStrike is operated independently by ikitsue, its creator, as an individual and not through a company. ikitsue is the data controller. No personal postal address is published. Contact: ikitsue.contact@gmail.com.',
         ],
       },
       {
@@ -91,7 +89,7 @@ export const legalCopy = {
       {
         heading: 'Your rights and contact',
         paragraphs: [
-          'Subject to GDPR conditions, you may request access, rectification, erasure, restriction or portability, object to certain processing, and withdraw consent at any time for the future. Contact the controller using the address published on the site once confirmed by the publisher. You may also lodge a complaint with the French CNIL (cnil.fr).',
+          'Subject to GDPR conditions, you may request access, rectification, erasure, restriction or portability, object to certain processing, and withdraw consent at any time for the future. To exercise your rights, contact ikitsue at ikitsue.contact@gmail.com. You may also lodge a complaint with the French CNIL (cnil.fr).',
           'No generative AI feature was identified in the audited code. User-submitted content may, of course, mention AI tools.',
         ],
       },
@@ -107,8 +105,7 @@ export const legalCopy = {
     privacyTitle: 'Политика конфиденциальности',
     privacy: [
       { heading: 'Оператор персональных данных', paragraphs: [
-        'NexaStrike — название сервиса. Издатель должен до публикации указать юридическое имя и контактные данные лица или организации, определяющих цели и способы обработки: [УКАЖИТЕ ИМЯ И АДРЕС ОПЕРАТОРА].',
-        'В нижней части сайта указан адрес ikitsue.contact@gmail.com; издателю необходимо подтвердить, что он работает, и указать ответственное за него лицо.',
+        'NexaStrike — независимый сервис, который ikitsue создал и ведёт как частное лицо, без компании. ikitsue является оператором персональных данных. Личный почтовый адрес не публикуется. Контакт: ikitsue.contact@gmail.com.',
       ] },
       { heading: 'Данные, цели и правовые основания', paragraphs: [
         'Учётная запись: при регистрации Supabase Auth получает адрес электронной почты, имя пользователя и пароль. Пароль обрабатывается службой аутентификации и не возвращается в запросах профиля. Профиль также может содержать необязательные Steam ID и изображение. Эти данные используются для создания и управления учётной записью и предоставления запрошенных функций (исполнение договора, статья 6(1)(b) GDPR).',
@@ -129,7 +126,7 @@ export const legalCopy = {
         'Контроль доступа и правила базы данных ограничивают некоторые операции. Абсолютную безопасность гарантировать нельзя. Пока самостоятельное удаление учётной записи недоступно, обратитесь к ответственному лицу.',
       ] },
       { heading: 'Ваши права и контакты', paragraphs: [
-        'При соблюдении условий GDPR вы можете запросить доступ, исправление, удаление, ограничение обработки или переносимость данных, возразить против некоторых видов обработки и отозвать согласие на будущее. Обратитесь к ответственному лицу по адресу, опубликованному на сайте после подтверждения издателем. Жалобу можно подать во французскую CNIL (cnil.fr).',
+        'При соблюдении условий GDPR вы можете запросить доступ, исправление, удаление, ограничение обработки или переносимость данных, возразить против некоторых видов обработки и отозвать согласие на будущее. Чтобы воспользоваться своими правами, свяжитесь с ikitsue по адресу ikitsue.contact@gmail.com. Жалобу можно подать во французскую CNIL (cnil.fr).',
         'В проверенном коде не обнаружена функция генеративного ИИ.',
       ] },
       { heading: 'Cookie и аналогичные технологии', paragraphs: [
@@ -141,8 +138,7 @@ export const legalCopy = {
     privacyTitle: 'Política de privacidad',
     privacy: [
       { heading: 'Responsable del tratamiento', paragraphs: [
-        'NexaStrike es el nombre del servicio. Antes de publicar esta política, el editor debe indicar la identidad jurídica y los datos de contacto de la persona o entidad que determina los fines y medios del tratamiento: [INDICAR IDENTIDAD Y DOMICILIO DEL RESPONSABLE].',
-        'El pie de página muestra ikitsue.contact@gmail.com; el editor debe confirmar que funciona e identificar quién lo gestiona.',
+        'NexaStrike es un servicio gestionado de forma independiente por ikitsue, su creador, como persona física y sin sociedad. ikitsue es el responsable del tratamiento. No se publica ninguna dirección postal personal. Contacto: ikitsue.contact@gmail.com.',
       ] },
       { heading: 'Datos, fines y bases jurídicas', paragraphs: [
         'Cuenta: el registro transmite a Supabase Auth el correo electrónico, el nombre de usuario y la contraseña. La contraseña la gestiona el servicio de autenticación y no se devuelve en las consultas del perfil. El perfil también admite un Steam ID y una imagen, ambos opcionales. Se utilizan para crear y gestionar la cuenta y prestar las funciones solicitadas (ejecución del contrato, artículo 6(1)(b) del RGPD).',
@@ -163,7 +159,7 @@ export const legalCopy = {
         'Los controles de acceso y las reglas de la base de datos limitan algunas operaciones. No se puede garantizar una seguridad absoluta. Mientras no exista una opción de eliminación autónoma, contacta con el responsable para solicitarla.',
       ] },
       { heading: 'Tus derechos y contacto', paragraphs: [
-        'Conforme a las condiciones del RGPD, puedes solicitar acceso, rectificación, supresión, limitación o portabilidad, oponerte a determinados tratamientos y retirar el consentimiento para el futuro. Contacta con el responsable mediante la dirección publicada en el sitio una vez confirmada por el editor. También puedes presentar una reclamación ante la CNIL francesa (cnil.fr).',
+        'Conforme a las condiciones del RGPD, puedes solicitar acceso, rectificación, supresión, limitación o portabilidad, oponerte a determinados tratamientos y retirar el consentimiento para el futuro. Para ejercer tus derechos, contacta con ikitsue en ikitsue.contact@gmail.com. También puedes presentar una reclamación ante la CNIL francesa (cnil.fr).',
         'En el código revisado no se identificó ninguna función de IA generativa.',
       ] },
       { heading: 'Cookies y tecnologías similares', paragraphs: [
@@ -175,8 +171,7 @@ export const legalCopy = {
     privacyTitle: '隐私政策',
     privacy: [
       { heading: '个人信息处理负责人', paragraphs: [
-        'NexaStrike 是服务名称。发布者须在发布前补充决定处理目的和方式的个人或机构的法定身份及联系方式：[请填写负责人身份和地址]。',
-        '网站页脚显示 ikitsue.contact@gmail.com；发布者须确认该邮箱有效并说明其负责人。',
+        'NexaStrike 由其创建者 ikitsue 以个人身份独立运营，不属于任何公司。ikitsue 是个人信息处理负责人。此处不公开个人邮寄地址。联系方式：ikitsue.contact@gmail.com。',
       ] },
       { heading: '数据、目的和法律依据', paragraphs: [
         '账户：注册时，电子邮箱、用户名和密码会发送至 Supabase Auth。密码由身份验证服务处理，不会通过网站的个人资料查询返回。个人资料还支持可选的 Steam ID 和头像。这些数据用于创建和管理账户并提供所请求的功能（履行合同，GDPR 第 6(1)(b) 条）。',
@@ -197,7 +192,7 @@ export const legalCopy = {
         '访问控制和数据库规则限制部分操作，但无法保证绝对安全。在提供自助删除账户功能前，请联系负责人申请删除。',
       ] },
       { heading: '您的权利和联系方式', paragraphs: [
-        '在 GDPR 规定的条件下，您可以请求访问、更正、删除、限制处理或转移数据，可以反对某些处理，也可以撤回未来的同意。发布者确认后，请通过网站公布的地址联系负责人。您也可以向法国 CNIL（cnil.fr）投诉。',
+        '在 GDPR 规定的条件下，您可以请求访问、更正、删除、限制处理或转移数据，可以反对某些处理，也可以撤回未来的同意。如需行使这些权利，请发送邮件至 ikitsue.contact@gmail.com 联系 ikitsue。您也可以向法国 CNIL（cnil.fr）投诉。',
         '已检查的代码中未发现生成式人工智能功能。',
       ] },
       { heading: 'Cookie 和类似技术', paragraphs: [
@@ -274,45 +269,45 @@ export const legalNoticeCopy = {
   fr: {
     title: 'Mentions légales',
     sections: [
-      ['Éditeur du site', 'Directeur ou directrice de la publication : ikitsue. E-mail : ikitsue.contact@gmail.com (adresse publiée dans le pied de page, à confirmer comme fonctionnelle).'],
+      ['Éditeur du site', 'Éditeur et responsable du traitement : ikitsue, créateur indépendant exerçant à titre individuel, sans société. Aucune adresse postale personnelle n’est publiée. Contact : ikitsue.contact@gmail.com.'],
       ['Hébergement', 'Le site est déployé sur Vercel (adresse publique : nexa-strike.vercel.app). L’entité juridique, l’adresse et les coordonnées d’hébergement actuellement applicables doivent être confirmées par l’éditeur dans son contrat Vercel. La base et l’authentification utilisent Supabase ; ce fournisseur n’est pas nécessairement l’hébergeur du site web.'],
-      ['Données personnelles', 'Les informations sur les traitements, les prestataires et les droits des personnes figurent dans la politique de confidentialité. L’identité du responsable du traitement doit être complétée avant publication.'],
+      ['Données personnelles', 'ikitsue, qui exploite NexaStrike à titre individuel, est le responsable du traitement. Les informations sur les traitements, les prestataires et les droits des personnes figurent dans la politique de confidentialité.'],
       ['Propriété intellectuelle', 'Les contenus et marques de tiers restent la propriété de leurs titulaires. Les crédits et le code source sont accessibles depuis la page Crédits.'],
     ],
   },
   en: {
     title: 'Legal notice',
     sections: [
-      ['Publisher', 'Publication director: ikitsue. Email: ikitsue.contact@gmail.com (listed in the footer; confirm that it is active).'],
+      ['Publisher', 'Publisher and data controller: ikitsue, an independent individual operating the service without a company. No personal postal address is published. Contact: ikitsue.contact@gmail.com.'],
       ['Hosting', 'The site is deployed on Vercel (public address: nexa-strike.vercel.app). The hosting entity, address and contact details applicable to the publisher’s Vercel contract must be confirmed. The database and authentication use Supabase; this provider is not necessarily the website host.'],
-      ['Personal data', 'Information about processing, providers and data-subject rights is available in the privacy policy. The controller identity must be completed before publication.'],
+      ['Personal data', 'ikitsue operates NexaStrike independently as an individual and is the data controller. Information about processing, providers and data-subject rights is available in the privacy policy.'],
       ['Intellectual property', 'Third-party content and trademarks remain the property of their respective owners. Credits and source code are available from the Credits page.'],
     ],
   },
   ru: {
     title: 'Юридическая информация',
     sections: [
-      ['Издатель сайта', 'Ответственный за публикацию: ikitsue. Электронная почта: ikitsue.contact@gmail.com (указан в нижней части сайта; необходимо подтвердить, что адрес работает).'],
+      ['Издатель сайта', 'Издатель и оператор персональных данных — ikitsue, независимый автор, который ведёт сервис как частное лицо, без компании. Личный почтовый адрес не публикуется. Контакт: ikitsue.contact@gmail.com.'],
       ['Хостинг', 'Сайт размещён на Vercel (публичный адрес: nexa-strike.vercel.app). Издателю следует подтвердить юридическое лицо, адрес и контакты хостинга по действующему договору Vercel. База данных и аутентификация используют Supabase; это не обязательно хостинг сайта.'],
-      ['Персональные данные', 'Сведения об обработке, поставщиках и правах пользователей приведены в политике конфиденциальности. Личность оператора необходимо указать до публикации.'],
+      ['Персональные данные', 'NexaStrike независимо ведёт ikitsue как частное лицо; он является оператором персональных данных. Сведения об обработке, поставщиках и правах пользователей приведены в политике конфиденциальности.'],
       ['Интеллектуальная собственность', 'Сторонние материалы и товарные знаки принадлежат соответствующим правообладателям. Кредиты и исходный код доступны на странице «Кредиты».'],
     ],
   },
   es: {
     title: 'Aviso legal',
     sections: [
-      ['Editor del sitio', 'Director de publicación: ikitsue. Correo electrónico: ikitsue.contact@gmail.com (publicado en el pie de página; se debe confirmar que está operativo).'],
+      ['Editor del sitio', 'Editor y responsable del tratamiento: ikitsue, creador independiente que gestiona el servicio como persona física y sin sociedad. No se publica ninguna dirección postal personal. Contacto: ikitsue.contact@gmail.com.'],
       ['Alojamiento', 'El sitio está desplegado en Vercel (dirección pública: nexa-strike.vercel.app). El editor debe confirmar la entidad, dirección y datos de contacto aplicables según su contrato con Vercel. La base de datos y la autenticación usan Supabase; este proveedor no tiene por qué ser el alojamiento web.'],
-      ['Datos personales', 'La política de privacidad contiene información sobre el tratamiento, los proveedores y los derechos de las personas. La identidad del responsable debe completarse antes de publicar.'],
+      ['Datos personales', 'ikitsue gestiona NexaStrike de forma independiente como persona física y es el responsable del tratamiento. La política de privacidad contiene información sobre el tratamiento, los proveedores y los derechos de las personas.'],
       ['Propiedad intelectual', 'El contenido y las marcas de terceros pertenecen a sus respectivos titulares. Los créditos y el código fuente están disponibles en la página de créditos.'],
     ],
   },
   zh: {
     title: '法律声明',
     sections: [
-      ['网站发布者', '出版负责人：ikitsue。电子邮箱：ikitsue.contact@gmail.com（页脚所列；须确认该邮箱有效）。'],
+      ['网站发布者', '发布者及个人信息处理负责人：ikitsue，独立创作者，以个人身份运营此服务，不属于任何公司。此处不公开个人邮寄地址。联系方式：ikitsue.contact@gmail.com。'],
       ['托管服务', '网站部署在 Vercel（公开地址：nexa-strike.vercel.app）。发布者须根据当前 Vercel 合同确认托管实体、地址和联系方式。数据库及身份验证使用 Supabase；该服务商不一定是网站托管商。'],
-      ['个人数据', '有关处理活动、服务商和个人权利的信息请参阅隐私政策。发布前须补充个人信息处理负责人的身份。'],
+      ['个人数据', 'NexaStrike 由 ikitsue 以个人身份独立运营，ikitsue 是个人信息处理负责人。有关处理活动、服务商和个人权利的信息请参阅隐私政策。'],
       ['知识产权', '第三方内容和商标归各自权利人所有。致谢和源代码可在致谢页面查看。'],
     ],
   },
