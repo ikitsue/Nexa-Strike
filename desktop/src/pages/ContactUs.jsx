@@ -100,7 +100,7 @@ const ContactUs = () => {
     } catch (error) {
       console.error('Could not create support ticket:', error);
       setSubmissionState('error');
-      setSubmissionError(error.message || t('ticketSaveError'));
+      setSubmissionError(t('ticketSaveError'));
     } finally {
       captchaRef.current?.resetCaptcha();
       setCaptchaToken('');

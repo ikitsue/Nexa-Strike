@@ -169,7 +169,7 @@ const Layout = () => {
           </div>
           {bannedAt && (
             <div className="banned-banner__meta">
-              {t('bannedOn')} {new Date(bannedAt).toLocaleString()}
+              {t('bannedOn')} {new Date(bannedAt).toLocaleString(language)}
             </div>
           )}
         </div>

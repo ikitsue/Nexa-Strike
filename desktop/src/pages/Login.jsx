@@ -4,6 +4,7 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { authAPI } from '../api/supabaseApi';
 import { useAuthStore } from '../store/authStore';
 import { useLanguage } from '../i18n';
+import { localizeApiMessage } from '../../../shared/i18nRuntime';
 import './Auth.css';
 
 const Login = () => {
@@ -35,11 +36,10 @@ const Login = () => {
       navigate('/');
     } catch (err) {
       const errorData = err.response?.data;
-      let errorMsg = errorData?.error || t('loginFailed');
+      let errorMsg = localizeApiMessage(errorData?.error || err.message, t, 'loginFailed');
       
-      // Show ban details if user is banned
       if (err.response?.status === 403 && errorData?.ban_reason) {
-        errorMsg += `\n\nReason: ${errorData.ban_reason}`;
+        errorMsg = `${t('accountBlocked')}\n\n${t('reason')}: ${errorData.ban_reason}`;
       }
       
       setError(errorMsg);

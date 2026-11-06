@@ -6,7 +6,7 @@ import { useLanguage } from '../i18n';
 import './Admin.css';
 
 const Admin = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [suggestions, setSuggestions] = useState([]);
   const [users, setUsers] = useState([]);
   const [maps, setMaps] = useState([]);
@@ -79,8 +79,7 @@ const Admin = () => {
       );
     } catch (error) {
       console.error('Error updating suggestion:', error);
-      const errorMsg = error.response?.data?.error || error.message || 'Failed to update suggestion';
-      alert(errorMsg);
+      alert(t('suggestionUpdateFailed'));
     }
   };
 
@@ -103,8 +102,7 @@ const Admin = () => {
       alert(t('bannedSuccessfully'));
     } catch (error) {
       console.error('Error banning user:', error);
-      const errorMsg = error.response?.data?.error || error.message || 'Failed to ban user';
-      alert(errorMsg);
+      alert(t('banUserFailed'));
     }
   };
 
@@ -120,8 +118,7 @@ const Admin = () => {
       alert(t('unbannedSuccessfully'));
     } catch (error) {
       console.error('Error unbanning user:', error);
-      const errorMsg = error.response?.data?.error || error.message || 'Failed to unban user';
-      alert(errorMsg);
+      alert(t('unbanUserFailed'));
     }
   };
 
@@ -207,7 +204,7 @@ const Admin = () => {
                         <strong>{t('by')}:</strong> {suggestion.users?.username || t('unknown')}
                       </span>
                       <span className="info-item">
-                        <strong>{t('date')}:</strong> {new Date(suggestion.created_at).toLocaleDateString()}
+                        <strong>{t('date')}:</strong> {new Date(suggestion.created_at).toLocaleDateString(language)}
                       </span>
                       <span className={`status ${suggestion.status}`}>
                         {t(suggestion.status)}
@@ -278,7 +275,7 @@ const Admin = () => {
                     <span className={`role-badge ${u.role}`}>{u.role}</span>
                   </div>
                   <div className="user-col-created">
-                    {new Date(u.created_at).toLocaleDateString()}
+                    {new Date(u.created_at).toLocaleDateString(language)}
                   </div>
                   <div className="user-col-status">
                     {u.banned ? (
@@ -335,7 +332,7 @@ const Admin = () => {
                     <div className="ban-reason-display">
                       <strong>{t('reason')}:</strong> {u.ban_reason}
                       <br />
-                      <strong>{t('date')}:</strong> {new Date(u.banned_at).toLocaleString()}
+                      <strong>{t('date')}:</strong> {new Date(u.banned_at).toLocaleString(language)}
                     </div>
                   )}
                 </div>

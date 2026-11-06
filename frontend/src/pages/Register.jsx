@@ -4,6 +4,7 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { authAPI } from '../api/supabaseApi';
 import { useAuthStore } from '../store/authStore';
 import { useLanguage } from '../i18n';
+import { localizeApiMessage } from '../../../shared/i18nRuntime';
 import './Auth.css';
 
 const Register = () => {
@@ -44,12 +45,13 @@ const Register = () => {
     } catch (err) {
       const errorData = err.response?.data;
       
-      // Display validation details if available
       if (errorData?.details && Array.isArray(errorData.details)) {
-        const messages = errorData.details.map(detail => `${detail.field}: ${detail.message}`).join('\n');
+        const messages = errorData.details
+          .map((detail) => localizeApiMessage(detail.message, t, 'validationFailed'))
+          .join('\n');
         setError(messages);
       } else {
-        setError(errorData?.error || err.message || t('registrationFailed'));
+        setError(localizeApiMessage(errorData?.error || err.message, t, 'registrationFailed'));
       }
       
       // Reset captcha on error

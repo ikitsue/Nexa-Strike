@@ -43,6 +43,7 @@ function AdminOnly({ children }) {
 function AppRoutes() {
   const speedInsightsScriptSrc = import.meta.env.VITE_SPEED_INSIGHTS_SCRIPT_SRC;
   const { preferences } = useCookieConsent();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const canLoadWebAnalytics = !window.electron && window.location.protocol !== 'file:';
 
@@ -96,7 +97,7 @@ function AppRoutes() {
 
   return (
     <>
-      <Suspense fallback={<div role="status">Loading...</div>}>
+      <Suspense fallback={<div role="status">{t('loading')}</div>}>
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />

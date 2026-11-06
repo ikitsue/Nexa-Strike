@@ -213,7 +213,7 @@ const EasterEgg = () => {
                   <span>{name}</span>
                   <span
                     className="easter-egg__contributor-count"
-                    aria-label={t('easterEggContributionCount').replace('{count}', count.toLocaleString(language))}
+                    aria-label={t('easterEggContributionCount', { count })}
                   >
                     × {count.toLocaleString(language)}
                   </span>

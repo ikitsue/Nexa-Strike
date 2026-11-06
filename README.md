@@ -13,6 +13,12 @@ NexaStrike is made up of several components: a backend (API and database), a web
 - `frontend/`: web interface
 - `public/`, `uploads/`: public assets and uploaded files
 
+## Languages
+
+The web and desktop apps share their interface translations in `shared/i18nTranslations.js` and locale handling in `shared/i18nRuntime.js`. English is the fallback language; French, Russian, Spanish, and Simplified Chinese are also available. The language selector saves the choice in browser/Electron local storage under `nexastrike-language`; when there is no saved choice, the app uses the first supported browser language.
+
+When adding a language or changing a user-facing string, update every locale in the shared catalog, preserve interpolation placeholders, and verify that both the web and desktop builds succeed. Supabase Auth confirmation and recovery email templates are configured in the Supabase Dashboard, outside this repository.
+
 ## Requirements
 
 - Node.js (>=14)

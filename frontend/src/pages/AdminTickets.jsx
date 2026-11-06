@@ -6,7 +6,7 @@ import './AdminTickets.css';
 
 const AdminTickets = () => {
   const { user } = useAuthStore();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -109,7 +109,7 @@ const AdminTickets = () => {
 
                 <div className="ticket-meta">
                   <span><strong>{t('assignedTo')}:</strong> {ticket.assigned_to || t('unassigned')}</span>
-                  <span><strong>{t('created')}:</strong> {new Date(ticket.created_at).toLocaleString()}</span>
+                  <span><strong>{t('created')}:</strong> {new Date(ticket.created_at).toLocaleString(language)}</span>
                 </div>
 
                 <section className="ticket-conversation" aria-label={t('ticketConversation')}>
@@ -118,7 +118,7 @@ const AdminTickets = () => {
                     <div className={`ticket-reply ${reply.author_role}`} key={reply.id}>
                       <p><strong>{reply.author_role === 'admin' ? t('supportTeam') : reply.author_username || reply.author_email}</strong></p>
                       <p>{reply.message}</p>
-                      <small>{new Date(reply.created_at).toLocaleString()}</small>
+                      <small>{new Date(reply.created_at).toLocaleString(language)}</small>
                     </div>
                   ))}
                   <form className="ticket-reply-form" onSubmit={(event) => handleReply(event, ticket.id)}>

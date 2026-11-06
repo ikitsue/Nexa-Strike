@@ -4,7 +4,7 @@ import { useLanguage } from '../i18n';
 import './Profile.css';
 
 const Profile = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [profile, setProfile] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [achievements, setAchievements] = useState([]);
@@ -96,7 +96,7 @@ const Profile = () => {
 
           <div className="info-group">
             <label>{t('memberSince')}:</label>
-            <span>{new Date(profile.created_at).toLocaleDateString()}</span>
+            <span>{new Date(profile.created_at).toLocaleDateString(language)}</span>
           </div>
         </div>
       </div>
@@ -141,7 +141,7 @@ const Profile = () => {
                   <p>{suggestion.description}</p>
                   <div className="suggestion-meta">
                     <span className={`status ${suggestion.status}`}>{suggestion.status}</span>
-                    <small>{new Date(suggestion.created_at).toLocaleDateString()}</small>
+                    <small>{new Date(suggestion.created_at).toLocaleDateString(language)}</small>
                   </div>
                 </div>
                 <button
