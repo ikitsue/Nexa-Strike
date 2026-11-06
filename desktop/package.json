@@ -1,6 +1,6 @@
 {
   "name": "cs2-utility-desktop",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "NexaStrike desktop app",
   "main": "public/electron.js",
   "homepage": "./",

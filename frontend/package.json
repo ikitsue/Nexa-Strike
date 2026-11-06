@@ -1,6 +1,6 @@
 {
   "name": "cs2-utility-frontend",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "Frontend for CS2 Utility App",
   "private": true,
   "dependencies": {
