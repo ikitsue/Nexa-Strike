@@ -7,8 +7,17 @@ const checkOrigin = (origin, env = {}) => new Promise((resolve) => {
 });
 
 describe('CORS origin allowlist', () => {
+  test.each([
+    'https://nexa-strike.com',
+    'https://www.nexa-strike.com',
+  ])('allows the custom production frontend origin %s', async (origin) => {
+    const result = await checkOrigin(origin, { NODE_ENV: 'production' });
+
+    expect(result).toEqual({ error: null, allowed: true });
+  });
+
   test('allows the configured production frontend origin', async () => {
-    const result = await checkOrigin('https://nexa-strike.vercel.app');
+    const result = await checkOrigin('https://nexa-strike.vercel.app', { NODE_ENV: 'production' });
 
     expect(result).toEqual({ error: null, allowed: true });
   });
@@ -86,7 +95,7 @@ describe('CORS origin allowlist', () => {
     const req = {
       method: 'POST',
       headers: { cookie: 'token=session' },
-      get: () => 'https://nexa-strike.vercel.app',
+      get: () => 'https://nexa-strike.com',
     };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();

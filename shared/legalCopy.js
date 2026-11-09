@@ -270,7 +270,7 @@ export const legalNoticeCopy = {
     title: 'Mentions légales',
     sections: [
       ['Éditeur du site', 'Éditeur et responsable du traitement : ikitsue, créateur indépendant exerçant à titre individuel, sans société. Aucune adresse postale personnelle n’est publiée. Contact : ikitsue.contact@gmail.com.'],
-      ['Hébergement', 'Le site est déployé sur Vercel (adresse publique : nexa-strike.vercel.app). L’entité juridique, l’adresse et les coordonnées d’hébergement actuellement applicables doivent être confirmées par l’éditeur dans son contrat Vercel. La base et l’authentification utilisent Supabase ; ce fournisseur n’est pas nécessairement l’hébergeur du site web.'],
+      ['Hébergement', 'Le site est déployé sur Vercel (adresse publique : nexa-strike.com). L’entité juridique, l’adresse et les coordonnées d’hébergement actuellement applicables doivent être confirmées par l’éditeur dans son contrat Vercel. La base et l’authentification utilisent Supabase ; ce fournisseur n’est pas nécessairement l’hébergeur du site web.'],
       ['Données personnelles', 'ikitsue, qui exploite NexaStrike à titre individuel, est le responsable du traitement. Les informations sur les traitements, les prestataires et les droits des personnes figurent dans la politique de confidentialité.'],
       ['Propriété intellectuelle', 'Les contenus et marques de tiers restent la propriété de leurs titulaires. Les crédits et le code source sont accessibles depuis la page Crédits.'],
     ],
@@ -279,7 +279,7 @@ export const legalNoticeCopy = {
     title: 'Legal notice',
     sections: [
       ['Publisher', 'Publisher and data controller: ikitsue, an independent individual operating the service without a company. No personal postal address is published. Contact: ikitsue.contact@gmail.com.'],
-      ['Hosting', 'The site is deployed on Vercel (public address: nexa-strike.vercel.app). The hosting entity, address and contact details applicable to the publisher’s Vercel contract must be confirmed. The database and authentication use Supabase; this provider is not necessarily the website host.'],
+      ['Hosting', 'The site is deployed on Vercel (public address: nexa-strike.com). The hosting entity, address and contact details applicable to the publisher’s Vercel contract must be confirmed. The database and authentication use Supabase; this provider is not necessarily the website host.'],
       ['Personal data', 'ikitsue operates NexaStrike independently as an individual and is the data controller. Information about processing, providers and data-subject rights is available in the privacy policy.'],
       ['Intellectual property', 'Third-party content and trademarks remain the property of their respective owners. Credits and source code are available from the Credits page.'],
     ],
@@ -288,7 +288,7 @@ export const legalNoticeCopy = {
     title: 'Юридическая информация',
     sections: [
       ['Издатель сайта', 'Издатель и оператор персональных данных — ikitsue, независимый автор, который ведёт сервис как частное лицо, без компании. Личный почтовый адрес не публикуется. Контакт: ikitsue.contact@gmail.com.'],
-      ['Хостинг', 'Сайт размещён на Vercel (публичный адрес: nexa-strike.vercel.app). Издателю следует подтвердить юридическое лицо, адрес и контакты хостинга по действующему договору Vercel. База данных и аутентификация используют Supabase; это не обязательно хостинг сайта.'],
+      ['Хостинг', 'Сайт размещён на Vercel (публичный адрес: nexa-strike.com). Издателю следует подтвердить юридическое лицо, адрес и контакты хостинга по действующему договору Vercel. База данных и аутентификация используют Supabase; это не обязательно хостинг сайта.'],
       ['Персональные данные', 'NexaStrike независимо ведёт ikitsue как частное лицо; он является оператором персональных данных. Сведения об обработке, поставщиках и правах пользователей приведены в политике конфиденциальности.'],
       ['Интеллектуальная собственность', 'Сторонние материалы и товарные знаки принадлежат соответствующим правообладателям. Кредиты и исходный код доступны на странице «Кредиты».'],
     ],
@@ -297,7 +297,7 @@ export const legalNoticeCopy = {
     title: 'Aviso legal',
     sections: [
       ['Editor del sitio', 'Editor y responsable del tratamiento: ikitsue, creador independiente que gestiona el servicio como persona física y sin sociedad. No se publica ninguna dirección postal personal. Contacto: ikitsue.contact@gmail.com.'],
-      ['Alojamiento', 'El sitio está desplegado en Vercel (dirección pública: nexa-strike.vercel.app). El editor debe confirmar la entidad, dirección y datos de contacto aplicables según su contrato con Vercel. La base de datos y la autenticación usan Supabase; este proveedor no tiene por qué ser el alojamiento web.'],
+      ['Alojamiento', 'El sitio está desplegado en Vercel (dirección pública: nexa-strike.com). El editor debe confirmar la entidad, dirección y datos de contacto aplicables según su contrato con Vercel. La base de datos y la autenticación usan Supabase; este proveedor no tiene por qué ser el alojamiento web.'],
       ['Datos personales', 'ikitsue gestiona NexaStrike de forma independiente como persona física y es el responsable del tratamiento. La política de privacidad contiene información sobre el tratamiento, los proveedores y los derechos de las personas.'],
       ['Propiedad intelectual', 'El contenido y las marcas de terceros pertenecen a sus respectivos titulares. Los créditos y el código fuente están disponibles en la página de créditos.'],
     ],
@@ -306,7 +306,7 @@ export const legalNoticeCopy = {
     title: '法律声明',
     sections: [
       ['网站发布者', '发布者及个人信息处理负责人：ikitsue，独立创作者，以个人身份运营此服务，不属于任何公司。此处不公开个人邮寄地址。联系方式：ikitsue.contact@gmail.com。'],
-      ['托管服务', '网站部署在 Vercel（公开地址：nexa-strike.vercel.app）。发布者须根据当前 Vercel 合同确认托管实体、地址和联系方式。数据库及身份验证使用 Supabase；该服务商不一定是网站托管商。'],
+      ['托管服务', '网站部署在 Vercel（公开地址：nexa-strike.com）。发布者须根据当前 Vercel 合同确认托管实体、地址和联系方式。数据库及身份验证使用 Supabase；该服务商不一定是网站托管商。'],
       ['个人数据', 'NexaStrike 由 ikitsue 以个人身份独立运营，ikitsue 是个人信息处理负责人。有关处理活动、服务商和个人权利的信息请参阅隐私政策。'],
       ['知识产权', '第三方内容和商标归各自权利人所有。致谢和源代码可在致谢页面查看。'],
     ],

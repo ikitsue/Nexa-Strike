@@ -6,6 +6,8 @@ const DEVELOPMENT_ALLOWED_ORIGINS = [
 ];
 
 const PRODUCTION_ALLOWED_ORIGINS = [
+  'https://nexa-strike.com',
+  'https://www.nexa-strike.com',
   'https://nexa-strike.vercel.app',
   'https://www.nexa-strike.vercel.app',
 ];
