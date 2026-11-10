@@ -59,10 +59,10 @@ test('routes POST to authentication and rejects unsupported methods explicitly',
   }
 });
 
-test('builds the media handler as a Vercel Node function outside the SPA rewrite', () => {
-  assert.ok(vercelConfig.builds.some(
-    ({ src, use }) => src === 'api/media.js' && use === '@vercel/node',
-  ));
+test('keeps the media handler auto-detectable outside the SPA rewrite', () => {
+  assert.equal(typeof mediaApi, 'function');
+  assert.equal(vercelConfig.outputDirectory, 'build');
+  assert.equal(vercelConfig.builds, undefined);
   assert.ok(vercelConfig.rewrites.every(
     ({ source }) => source.includes('(?!_vercel/|api/)'),
   ));
