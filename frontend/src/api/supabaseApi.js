@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { deleteR2Images, uploadImageToR2 } from '../../../shared/r2Media.js';
 
 const USER_PROFILE_COLUMNS =
   'id,email,username,steam_id,profile_picture,role,banned,ban_reason,banned_at,created_at';
@@ -26,14 +27,8 @@ const uploadLineImage = async (file) => {
     throw new Error('Line zoom images must be image files');
   }
 
-  const safeFileName = sanitizeStorageFileName(file.name || 'line-image');
-  const uniquePrefix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const { data, error } = await supabase.storage
-    .from('utility-points')
-    .upload(`line-images/${uniquePrefix}-${safeFileName}`, file);
-
-  if (error) throw error;
-  return data.path;
+  const { url } = await uploadImageToR2(supabase, file, 'line');
+  return url;
 };
 
 // Auth API
@@ -155,18 +150,14 @@ export const mapsAPI = {
   },
 
   create: async (formData) => {
+    const uploadedR2Images = [];
     try {
       // Handle image upload if exists
       let imageUrl = null;
       if (formData.get('file')) {
         const file = formData.get('file');
-        const safeFileName = sanitizeStorageFileName(file.name || 'file');
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('maps')
-          .upload(`${Date.now()}-${safeFileName}`, file);
-
-        if (uploadError) throw uploadError;
-        imageUrl = uploadData.path;
+        ({ url: imageUrl } = await uploadImageToR2(supabase, file, 'map'));
+        uploadedR2Images.push(imageUrl);
       }
 
       const { data, error } = await supabase
@@ -182,6 +173,7 @@ export const mapsAPI = {
       if (error) throw error;
       return { data: data[0] };
     } catch (error) {
+      await deleteR2Images(supabase, uploadedR2Images);
       throw new Error(error.message || 'Failed to create map');
     }
   },
@@ -231,6 +223,7 @@ export const utilityPointsAPI = {
   },
 
   create: async (mapId, formData) => {
+    const uploadedR2Images = [];
     try {
       let mediaUrl = null;
       let imageUrl = null;
@@ -239,19 +232,20 @@ export const utilityPointsAPI = {
       const externalVideoUrl = formData.get('video_url')?.trim() || null;
       if (formData.get('file')) {
         const file = formData.get('file');
-        const safeFileName = sanitizeStorageFileName(file.name || 'file');
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('utility-points')
-          .upload(`${mapId}/${Date.now()}-${safeFileName}`, file);
+        if (file.type.startsWith('image/')) {
+          ({ url: imageUrl } = await uploadImageToR2(supabase, file, 'utility', mapId));
+          uploadedR2Images.push(imageUrl);
+        } else if (file.type.startsWith('video/')) {
+          const safeFileName = sanitizeStorageFileName(file.name || 'file');
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('utility-points')
+            .upload(`${mapId}/${Date.now()}-${safeFileName}`, file);
 
-        if (uploadError) throw uploadError;
-        mediaUrl = uploadData.path;
-
-        // Determine if it's a video or image
-        if (file.type.startsWith('video/')) {
+          if (uploadError) throw uploadError;
+          mediaUrl = uploadData.path;
           videoUrl = mediaUrl;
-        } else if (file.type.startsWith('image/')) {
-          imageUrl = mediaUrl;
+        } else {
+          throw new Error('Only image and video files are supported');
         }
       }
 
@@ -269,6 +263,7 @@ export const utilityPointsAPI = {
       if (formData.get('utility_type') === 'line') {
         insertData.zoom_in_image_url = await uploadLineImage(formData.get('zoom_in_file'));
         insertData.zoom_out_image_url = await uploadLineImage(formData.get('zoom_out_file'));
+        uploadedR2Images.push(insertData.zoom_in_image_url, insertData.zoom_out_image_url);
       }
       const teamValue = formData.get('team');
       if (teamValue) insertData.team = teamValue;
@@ -287,25 +282,41 @@ export const utilityPointsAPI = {
       if (response.error) throw response.error;
       return { data: null };
     } catch (error) {
+      await deleteR2Images(supabase, uploadedR2Images);
       throw new Error(error.message || 'Failed to create utility point');
     }
   },
 
   update: async (pointId, formData) => {
+    const uploadedR2Images = [];
     try {
+      const { data: previousPoint, error: previousPointError } = await supabase
+        .from('utility_points')
+        .select('map_id,image_url,zoom_in_image_url,zoom_out_image_url')
+        .eq('id', pointId)
+        .single();
+      if (previousPointError) throw previousPointError;
+
       const externalVideoUrl = formData.get('video_url')?.trim() || null;
       let mediaUrl = null;
       let uploadedFileType = null;
       if (formData.get('file')) {
         const file = formData.get('file');
         uploadedFileType = file.type;
-        const safeFileName = sanitizeStorageFileName(file.name || 'file');
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('utility-points')
-          .upload(`${Date.now()}-${safeFileName}`, file);
+        if (file.type.startsWith('image/')) {
+          ({ url: mediaUrl } = await uploadImageToR2(supabase, file, 'utility', previousPoint.map_id));
+          uploadedR2Images.push(mediaUrl);
+        } else if (file.type.startsWith('video/')) {
+          const safeFileName = sanitizeStorageFileName(file.name || 'file');
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('utility-points')
+            .upload(`${Date.now()}-${safeFileName}`, file);
 
-        if (uploadError) throw uploadError;
-        mediaUrl = uploadData.path;
+          if (uploadError) throw uploadError;
+          mediaUrl = uploadData.path;
+        } else {
+          throw new Error('Only image and video files are supported');
+        }
       }
 
       const updateData = {
@@ -321,6 +332,7 @@ export const utilityPointsAPI = {
       if (formData.get('utility_type') === 'line') {
         const zoomInImageUrl = await uploadLineImage(formData.get('zoom_in_file'));
         const zoomOutImageUrl = await uploadLineImage(formData.get('zoom_out_file'));
+        uploadedR2Images.push(zoomInImageUrl, zoomOutImageUrl);
         if (zoomInImageUrl) updateData.zoom_in_image_url = zoomInImageUrl;
         if (zoomOutImageUrl) updateData.zoom_out_image_url = zoomOutImageUrl;
       }
@@ -356,20 +368,43 @@ export const utilityPointsAPI = {
       }
 
       if (response.error) throw response.error;
+      const obsoleteImageUrls = [
+        ['image_url', previousPoint.image_url],
+        ['zoom_in_image_url', previousPoint.zoom_in_image_url],
+        ['zoom_out_image_url', previousPoint.zoom_out_image_url],
+      ]
+        .filter(([field, oldUrl]) => (
+          oldUrl && Object.prototype.hasOwnProperty.call(updateData, field) && updateData[field] !== oldUrl
+        ))
+        .map(([, oldUrl]) => oldUrl);
+      await deleteR2Images(supabase, obsoleteImageUrls);
       return { data: null };
     } catch (error) {
+      await deleteR2Images(supabase, uploadedR2Images);
       throw new Error(error.message || 'Failed to update utility point');
     }
   },
 
   delete: async (pointId) => {
     try {
+      const { data: point, error: pointError } = await supabase
+        .from('utility_points')
+        .select('image_url,zoom_in_image_url,zoom_out_image_url')
+        .eq('id', pointId)
+        .maybeSingle();
+      if (pointError) throw pointError;
+
       const { error } = await supabase
         .from('utility_points')
         .delete()
         .eq('id', pointId);
 
       if (error) throw error;
+      await deleteR2Images(supabase, [
+        point?.image_url,
+        point?.zoom_in_image_url,
+        point?.zoom_out_image_url,
+      ]);
       return { success: true };
     } catch (error) {
       throw new Error(error.message || 'Failed to delete utility point');
@@ -826,17 +861,25 @@ export const clipsAPI = {
   },
 
   upload: async (formData) => {
+    const uploadedR2Images = [];
     try {
       let fileUrl = null;
       if (formData.get('file')) {
         const file = formData.get('file');
         const safeFileName = sanitizeStorageFileName(file.name || 'file');
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('clips')
-          .upload(`${Date.now()}-${safeFileName}`, file);
+        if (file.type.startsWith('image/')) {
+          ({ url: fileUrl } = await uploadImageToR2(supabase, file, 'clip'));
+          uploadedR2Images.push(fileUrl);
+        } else if (file.type.startsWith('video/')) {
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('clips')
+            .upload(`${Date.now()}-${safeFileName}`, file);
 
-        if (uploadError) throw uploadError;
-        fileUrl = uploadData.path;
+          if (uploadError) throw uploadError;
+          fileUrl = uploadData.path;
+        } else {
+          throw new Error('Only image and video files are supported');
+        }
       }
 
       const { data: user } = await supabase.auth.getUser();
@@ -868,6 +911,7 @@ export const clipsAPI = {
       if (error) throw error;
       return { data: data[0] };
     } catch (error) {
+      await deleteR2Images(supabase, uploadedR2Images);
       throw new Error(error.message || 'Failed to upload clip');
     }
   },
@@ -902,6 +946,7 @@ export const getFileUrl = (filePath) => {
 
 export const getFileUrlFallbacks = (filePath) => {
   if (!filePath) return [];
+  if (/^https?:\/\//i.test(filePath)) return [getFileUrl(filePath)];
   const urls = [getFileUrl(filePath)];
   const cleanPath = filePath.replace(/^\/+|\/+$/g, '');
 

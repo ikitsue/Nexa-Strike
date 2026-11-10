@@ -3,7 +3,12 @@
   "version": "1.4.6",
   "description": "Frontend for CS2 Utility App",
   "private": true,
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1164.0",
+    "@aws-sdk/s3-request-presigner": "3.1164.0",
     "@hcaptcha/react-hcaptcha": "^2.0.2",
     "@supabase/supabase-js": "^2.108.1",
     "@vercel/analytics": "^2.0.1",
@@ -13,6 +18,7 @@
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^7.18.4",
+    "sharp": "0.35.5",
     "zustand": "^4.4.0"
   },
   "scripts": {
@@ -21,7 +27,8 @@
     "prebuild": "node ../scripts/set-version.js --bump",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "echo \"No test runner configured. Use jest or vitest.\" && exit 0"
+    "test": "node --test",
+    "migrate:images": "node scripts/migrate-supabase-images.js"
   },
   "eslintConfig": {
     "extends": [

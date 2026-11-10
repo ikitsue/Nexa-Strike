@@ -37,3 +37,6 @@ Thumbs.db
 logs/
 *.log
 .vercel
+
+# Local storage migration reports
+r2-migration-report*.json

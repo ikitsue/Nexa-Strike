@@ -2,6 +2,10 @@
   "version": 2,
   "builds": [
     {
+      "src": "api/media.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -11,7 +15,7 @@
   ],
   "rewrites": [
     {
-      "source": "/:path((?!_vercel/).*)",
+      "source": "/:path((?!_vercel/|api/).*)",
       "destination": "/index.html"
     }
   ]
