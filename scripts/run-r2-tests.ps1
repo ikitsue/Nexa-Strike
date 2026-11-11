@@ -32,7 +32,8 @@ $temporaryNames = @(
   'R2_ACCESS_KEY_ID',
   'R2_SECRET_ACCESS_KEY',
   'R2_STAGING_ACCESS_KEY_ID',
-  'R2_STAGING_SECRET_ACCESS_KEY'
+  'R2_STAGING_SECRET_ACCESS_KEY',
+  'R2_ENDPOINT'
 )
 $previousValues = @{}
 
@@ -44,6 +45,12 @@ try {
   if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
     throw 'Le script de test local est introuvable.'
   }
+
+  $endpoint = Read-Host -Prompt 'R2_ENDPOINT (https://<ACCOUNT_ID>.r2.cloudflarestorage.com)'
+  if ([string]::IsNullOrWhiteSpace($endpoint)) {
+    throw 'R2_ENDPOINT est obligatoire.'
+  }
+  [Environment]::SetEnvironmentVariable('R2_ENDPOINT', $endpoint, 'Process')
 
   Set-EnvironmentSecret -Name 'R2_ACCESS_KEY_ID' -Prompt 'Access Key ID du credential public'
   Set-EnvironmentSecret -Name 'R2_SECRET_ACCESS_KEY' -Prompt 'Secret Access Key du credential public'

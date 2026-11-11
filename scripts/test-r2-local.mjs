@@ -11,11 +11,40 @@ const {
   S3Client,
 } = requireFromFrontend('@aws-sdk/client-s3');
 
-const ENDPOINT = 'https://c7c843e34b757a4a40ac0c1e8ff92a37.r2.cloudflarestorage.com';
 const REGION = 'auto';
 const PUBLIC_BUCKET = 'nexa-strike-images';
 const STAGING_BUCKET = 'nexa-strike-images-staging';
 const TEST_PREFIX = '__r2_connectivity_test__/';
+
+const getEndpoint = () => {
+  const endpoint = process.env.R2_ENDPOINT;
+  if (!endpoint) {
+    throw Object.assign(new Error('R2_ENDPOINT is required'), { code: 'MissingR2Endpoint' });
+  }
+
+  let url;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    throw Object.assign(new Error('R2_ENDPOINT must be a valid URL'), { code: 'InvalidR2Endpoint' });
+  }
+
+  if (
+    url.protocol !== 'https:'
+    || url.username
+    || url.password
+    || !/^[a-f0-9]{32}\.r2\.cloudflarestorage\.com$/i.test(url.hostname)
+    || url.pathname !== '/'
+    || url.search
+    || url.hash
+  ) {
+    throw Object.assign(new Error('R2_ENDPOINT must be an HTTPS Cloudflare R2 account endpoint'), {
+      code: 'InvalidR2Endpoint',
+    });
+  }
+
+  return url.origin;
+};
 
 const clients = [
   {
@@ -66,7 +95,7 @@ const makeClient = ({ accessKeyId, secretAccessKey }) => {
   }
   return new S3Client({
     region: REGION,
-    endpoint: ENDPOINT,
+    endpoint: getEndpoint(),
     requestChecksumCalculation: 'WHEN_REQUIRED',
     credentials: { accessKeyId, secretAccessKey },
   });
