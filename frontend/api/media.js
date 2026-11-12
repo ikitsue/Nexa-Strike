@@ -2,6 +2,7 @@ const { createMediaHandler } = require('./lib/media');
 
 const DEFAULT_ORIGINS = [
   'https://nexa-strike.com',
+  'https://nexa-strike-mbktdm3te-axel4.vercel.app',
   'http://127.0.0.1:43127',
 ];
 
@@ -10,8 +11,8 @@ const getAllowedOrigins = () => {
   const origins = configured
     ? configured.split(',').map((origin) => origin.trim()).filter(Boolean)
     : DEFAULT_ORIGINS;
-  if (origins.includes('*')) {
-    throw new Error('MEDIA_ALLOWED_ORIGINS must not contain a wildcard');
+  if (origins.some((origin) => origin.includes('*'))) {
+    throw new Error('MEDIA_ALLOWED_ORIGINS must not contain wildcards');
   }
   return new Set(origins);
 };

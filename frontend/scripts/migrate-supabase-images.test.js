@@ -121,6 +121,17 @@ test('resolves Supabase URLs and bare paths to bucket object keys', () => {
   );
 });
 
+test('keeps clip media references in the clips Supabase bucket', () => {
+  assert.deepEqual(
+    getStorageReference(
+      'https://project.supabase.co/storage/v1/object/public/clips/1760000000000-tournament.mp4',
+      'clips',
+      'https://project.supabase.co',
+    ),
+    { bucket: 'clips', key: '1760000000000-tournament.mp4' },
+  );
+});
+
 test('copies and verifies the image before updating references', async () => {
   const input = migrationInput();
   const result = await migrateObject(input);

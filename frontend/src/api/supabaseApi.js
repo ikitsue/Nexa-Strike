@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 import { deleteR2Images, uploadImageToR2 } from '../../../shared/r2Media.js';
+import { getStoragePublicUrl } from './storageUrls.mjs';
 
 const USER_PROFILE_COLUMNS =
   'id,email,username,steam_id,profile_picture,role,banned,ban_reason,banned_at,created_at';
@@ -310,7 +311,7 @@ export const utilityPointsAPI = {
           const safeFileName = sanitizeStorageFileName(file.name || 'file');
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('utility-points')
-            .upload(`${Date.now()}-${safeFileName}`, file);
+            .upload(`${previousPoint.map_id}/${Date.now()}-${safeFileName}`, file);
 
           if (uploadError) throw uploadError;
           mediaUrl = uploadData.path;
@@ -854,7 +855,12 @@ export const clipsAPI = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return { data };
+      return {
+        data: data.map((clip) => ({
+          ...clip,
+          file_path: getFileUrl(clip.file_path, 'clips'),
+        })),
+      };
     } catch (error) {
       throw new Error(error.message || 'Failed to fetch clips');
     }
@@ -909,7 +915,12 @@ export const clipsAPI = {
         .select();
 
       if (error) throw error;
-      return { data: data[0] };
+      return {
+        data: {
+          ...data[0],
+          file_path: getFileUrl(data[0].file_path, 'clips'),
+        },
+      };
     } catch (error) {
       await deleteR2Images(supabase, uploadedR2Images);
       throw new Error(error.message || 'Failed to upload clip');
@@ -918,31 +929,9 @@ export const clipsAPI = {
 };
 
 // Helper to get full file URL
-export const getFileUrl = (filePath) => {
-  if (!filePath) return null;
-  if (filePath.startsWith('http')) return filePath;
-
-  const cleanPath = filePath.replace(/^\/+|\/+$/g, '');
-
-  // Serve relative app assets and backend upload files directly
-  if (filePath.startsWith('/') || cleanPath.startsWith('uploads/') || cleanPath.startsWith('images/')) {
-    return filePath.startsWith('/') ? filePath : `/${cleanPath}`;
-  }
-
-  // If the path already includes the bucket name, use it directly
-  if (cleanPath.startsWith('utility-points/') || cleanPath.startsWith('maps/')) {
-    const [bucketName, ...rest] = cleanPath.split('/');
-    const encodedObjectPath = rest.map((segment) => encodeURIComponent(segment)).join('/');
-    return `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${encodedObjectPath}`;
-  }
-
-  // Otherwise determine Supabase bucket by known storage path conventions
-  const isUtilityPoint = /^\d+\/\d+-/.test(cleanPath);
-  const bucketName = isUtilityPoint ? 'utility-points' : 'maps';
-  const encodedPath = cleanPath.split('/').map((segment) => encodeURIComponent(segment)).join('/');
-
-  return `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${encodedPath}`;
-};
+export const getFileUrl = (filePath, bucketName) => (
+  getStoragePublicUrl(filePath, import.meta.env.VITE_SUPABASE_URL, bucketName)
+);
 
 export const getFileUrlFallbacks = (filePath) => {
   if (!filePath) return [];
